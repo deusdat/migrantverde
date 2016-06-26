@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://deusdatsolutions.com/projects/migrations/"
+	targetNamespace="http://deusdatsolutions.com/projects/migrations/">
+
+	<complexType name="OperationType" abstract="true">
+		<attribute type="tns:ActionType" name="action" />
+	</complexType>
+
+	<simpleType name="ActionType">
+		<restriction base="string">
+			<enumeration value="create" />
+			<enumeration value="drop" />
+			<enumeration value="modify" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="NamedOperationType" abstract="true">
+		<complexContent>
+			<extension base="tns:OperationType">
+				<attribute name="name" type="string"></attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="CollectionOperationType">
+		<complexContent>
+			<extension base="tns:NamedOperationType"></extension>
+		</complexContent>
+	</complexType>
+	
+	<complexType name="DatabaseOperationType">
+		<complexContent>
+			<extension base="tns:NamedOperationType"></extension>
+		</complexContent>
+	</complexType>
+	
+	<simpleType name="AqlOperationType">
+		<restriction base="string"></restriction>
+	</simpleType>
+
+	<element name="migration" type="tns:MigrationType"></element>
+
+	<group name="OperationsGroup">
+		<choice>
+			<element name="database" type="tns:DatabaseOperationType" />
+			<element name="collection" type="tns:CollectionOperationType" />
+			<element name="aql" type="tns:AqlOperationType" />
+		</choice>
+	</group>
+
+	<complexType name="MigrationType">
+		<sequence>
+			<element name="up">
+				<complexType>
+					<group ref="tns:OperationsGroup"></group>
+				</complexType>
+			</element>
+			<element name="down" minOccurs="0">
+				<complexType>
+					<group ref="tns:OperationsGroup"></group>
+				</complexType>
+			</element>
+		</sequence>
+	</complexType>
+
+</schema>
