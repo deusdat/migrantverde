@@ -38,9 +38,10 @@ public class Migrator {
 		this.handler = new MasterHandler(action, driver);
 	}
 
-	public void migrate(final String migrationRoot) {
+	public int migrate(final String migrationRoot) {
 		final SortedSet<Path> migrations = finder.migrations(migrationRoot);
 		fullMigration = isFullMigration(migrations.first());
+		int executed = 0;
 		for (final Path p : migrations) {
 			final MigrationType migration = deserializier.get(p);
 			final String migrationName = p.getFileName().toString().replace(".xml", "");
@@ -49,11 +50,13 @@ public class Migrator {
 					final MigrationContext migrationContext = new MigrationContext(migrationName, migration);
 					handler.migrate(migrationContext);
 					recordMigration(migrationContext);
+					executed++;
 				}
 			} catch (final ArangoException e) {
 				throw new MigrationException("Couldn't perform migration", e);
 			}
 		}
+		return executed;
 	}
 	
 	private boolean isFullMigration(final Path first) {
