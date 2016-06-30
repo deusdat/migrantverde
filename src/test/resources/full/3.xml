@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:migration 
+	xmlns:tns="http://deusdatsolutions.com/projects/migrations/" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://deusdatsolutions.com/projects/migrations/ migrations.xsd ">
+  <up>
+  	<aql>
+  		INSERT {name : "Princess Angelina Contessa Louisa Francesca Banana Fanna Bo Besca III", age: 14, "_key" : "dotWarner"} IN Users
+  	</aql>
+  </up>
+</tns:migration>

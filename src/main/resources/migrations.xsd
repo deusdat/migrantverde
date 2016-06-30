@@ -27,13 +27,24 @@
 			<extension base="tns:NamedOperationType"></extension>
 		</complexContent>
 	</complexType>
-	
+
 	<complexType name="DatabaseOperationType">
 		<complexContent>
-			<extension base="tns:NamedOperationType"></extension>
+			<extension base="tns:NamedOperationType">
+				<sequence>
+					<element name="user" minOccurs="0" maxOccurs="unbounded">
+						<complexType>
+							<sequence>
+								<element name="username" type="string" />
+								<element name="password" type="string" />
+							</sequence>
+						</complexType>
+					</element>
+				</sequence>
+			</extension>
 		</complexContent>
 	</complexType>
-	
+
 	<simpleType name="AqlOperationType">
 		<restriction base="string"></restriction>
 	</simpleType>

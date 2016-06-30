@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.arangodb.ArangoDriver;
+import com.arangodb.ArangoException;
 import com.deusdatsolutions.migrantverde.Action;
 import com.deusdatsolutions.migrantverde.MigrationContext;
 import com.deusdatsolutions.migrantverde.jaxb.CollectionOperationType;
@@ -35,7 +36,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallMigrateFakeCollection() {
+	public void shouldCallMigrateFakeCollection() throws ArangoException {
 		final MigrationType mt = new MigrationType();
 		final Up up = new Up();
 		up.setCollection(new CollectionOperationType());
@@ -47,7 +48,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallMigrateFakeDatabase() {
+	public void shouldCallMigrateFakeDatabase() throws ArangoException {
 		final MigrationType mt = new MigrationType();
 		final Up up = new Up();
 		up.setDatabase(new DatabaseOperationType());
@@ -59,7 +60,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallMigrateFakeAQL() {
+	public void shouldCallMigrateFakeAQL() throws ArangoException {
 		final MigrationType mt = new MigrationType();
 		final Up up = new Up();
 		up.setAql("FOR u IN users RETURN u");
@@ -71,7 +72,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallRollbackFakeCollection() {
+	public void shouldCallRollbackFakeCollection() throws ArangoException {
 		final MigrationType mt = new MigrationType();
 		final Down down = new Down();
 		down.setCollection(new CollectionOperationType());
@@ -83,7 +84,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallRollbackFakeDatabase() {
+	public void shouldCallRollbackFakeDatabase() throws ArangoException {
 		final MigrationType mt = new MigrationType();
 		final Down down = new Down();
 		down.setDatabase(new DatabaseOperationType());
@@ -95,7 +96,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallRollbackFakeAQL() {
+	public void shouldCallRollbackFakeAQL() throws ArangoException {
 		final MigrationType mt = new MigrationType();
 		final Down down = new Down();
 		down.setAql("FOR u IN users RETURN u");

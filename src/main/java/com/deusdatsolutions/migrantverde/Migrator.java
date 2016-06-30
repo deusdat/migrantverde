@@ -10,7 +10,7 @@ import com.arangodb.ArangoDriver;
 import com.arangodb.ArangoException;
 import com.arangodb.CursorResult;
 import com.arangodb.entity.BaseDocument;
-import com.arangodb.entity.CollectionEntity;
+import com.arangodb.entity.StringsResultEntity;
 import com.deusdatsolutions.migrantverde.handlers.MasterHandler;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
 
@@ -26,6 +26,7 @@ public class Migrator {
 	private final MasterHandler handler;
 	private final ArangoDriver driver;
 	private final Action action;
+	private boolean fullMigration;
 
 	public Migrator(final ArangoDriver driver,
 					final Action action) {
@@ -39,13 +40,15 @@ public class Migrator {
 
 	public void migrate(final String migrationRoot) {
 		final SortedSet<Path> migrations = finder.migrations(migrationRoot);
+		fullMigration = isFullMigration(migrations.first());
 		for (final Path p : migrations) {
 			final MigrationType migration = deserializier.get(p);
 			final String migrationName = p.getFileName().toString().replace(".xml", "");
 			try {
 				if (notApplied(migrationName)) {
-					handler.migrate(new MigrationContext(migrationName, migration));
-					recordMigration(migrationName);
+					final MigrationContext migrationContext = new MigrationContext(migrationName, migration);
+					handler.migrate(migrationContext);
+					recordMigration(migrationContext);
 				}
 			} catch (final ArangoException e) {
 				throw new MigrationException("Couldn't perform migration", e);
@@ -53,24 +56,60 @@ public class Migrator {
 		}
 	}
 	
-	private void recordMigration(final String migrationName) throws ArangoException {
+	private boolean isFullMigration(final Path first) {
+		final MigrationType migration = deserializier.get(first);
+		return action == Action.MIGRATION && migration.getUp().getDatabase() != null && dbDoesntExit(migration.getUp().getDatabase().getName());
+	}
+
+	private void initMigrationTracker(final MigrationContext migrationContext) throws ArangoException {
+		if(fullMigration) {
+			final String name = migrationContext.getMigration().getUp().getDatabase().getName();
+			driver.setDefaultDatabase(name);
+		}
+		try {
+			driver.getCollection(MIGRATION_COLLECTION);
+		} catch (final ArangoException e) {
+			if(e.getCode() == 404) {
+				driver.createCollection(MIGRATION_COLLECTION);
+			}
+		}
+
+		fullMigration = false;
+	}
+	
+	private boolean dbDoesntExit(final String name) {
+		boolean result = false;
+		try {
+			final StringsResultEntity databases = driver.getDatabases();
+			result = !databases.getResult().contains(name);
+		} catch (final ArangoException e) {
+			
+		}
+		return result;
+	}
+
+	private void recordMigration(final MigrationContext migrationContext) throws ArangoException {
+		initMigrationTracker(migrationContext);
 		final BaseDocument bd = new BaseDocument();
-		bd.addAttribute("name", migrationName);
+		bd.addAttribute("name", migrationContext.getMigrationVersion());
 		bd.addAttribute("action", action);
 		bd.addAttribute("applied", new Date());
 		driver.createDocument(MIGRATION_COLLECTION, bd);
 	}
 	
 	private boolean notApplied(final String migrationName) throws ArangoException {
-		getMigrationCollection();
+		if(fullMigration) {
+			return true;
+		}
 		final Map<String, Object> params = new HashMap<>();
 		params.put("action", action);
 		params.put("name", migrationName);
 		CursorResult<BaseDocument> result = null;
-		final int countSize = -1;
+		int countSize = -1;
 		try {
 			result = driver.executeAqlQuery(MIGRATION_APPLIED_QUERY, params, null, BaseDocument.class);
-			result.getCount();
+			final BaseDocument uniqueResult = result.getUniqueResult();
+			countSize = uniqueResult == null ? 0 : -1;
 		} finally {
 			if(result != null) {
 				result.close();
@@ -80,11 +119,4 @@ public class Migrator {
 		return countSize == 0;
 	}
 
-	private long getMigrationCollection() throws ArangoException {
-		CollectionEntity collection = driver.getCollection(MIGRATION_COLLECTION);
-		if (collection == null) {
-			collection = driver.createCollection(MIGRATION_COLLECTION);
-		}
-		return collection.getId();
-	}
 }

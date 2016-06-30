@@ -1,14 +1,43 @@
 package com.deusdatsolutions.migrantverde.handlers;
 
-import com.arangodb.ArangoDriver;
-import com.deusdatsolutions.migrantverde.jaxb.NamedOperationType;
+import java.util.List;
 
-public class DatabaseHandler implements IMigrationHandler<NamedOperationType> {
+import com.arangodb.ArangoDriver;
+import com.arangodb.ArangoException;
+import com.arangodb.entity.UserEntity;
+import com.deusdatsolutions.migrantverde.jaxb.ActionType;
+import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType;
+import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType.User;
+
+/**
+ * 
+ * 
+ * @author J Patrick Davenport
+ *
+ */
+public class DatabaseHandler implements IMigrationHandler<DatabaseOperationType> {
 
 	@Override
-	public void migrate(final NamedOperationType migration, final ArangoDriver driver) {
-		// TODO Auto-generated method stub
-
+	public void migrate(final DatabaseOperationType migration, final ArangoDriver driver) throws ArangoException {
+		final ActionType action = migration.getAction();
+		final String name = migration.getName();
+		switch (action) {
+		case CREATE:
+			final List<User> users = migration.getUser();
+			final UserEntity[] withAccess = new UserEntity[users.size()];
+			int i = 0;
+			for (final User u : users) {
+				final UserEntity ue = new UserEntity(u.getUsername(), u.getPassword(), true, null);
+				withAccess[i] = ue;
+				i++;
+			}
+			driver.createDatabase(name, withAccess);
+			break;
+		case DROP:
+			break;
+		default:
+			throw new IllegalStateException("Can't handle " + action);
+		}
 	}
 
 }

@@ -4,10 +4,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.helpers.DefaultValidationEventHandler;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+
+import org.xml.sax.SAXException;
 
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
 
@@ -20,7 +26,13 @@ public class Deserializier {
 		try {
 			this.ctx = JAXBContext.newInstance("com.deusdatsolutions.migrantverde.jaxb");
 			this.jaxbUnmarshaller = ctx.createUnmarshaller();
-		} catch (final JAXBException ex) {
+
+			final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+			final Schema migrationSchema = schemaFactory.newSchema(this.getClass().getResource("/migrations.xsd"));
+
+			jaxbUnmarshaller.setSchema(migrationSchema);
+			jaxbUnmarshaller.setEventHandler(new DefaultValidationEventHandler());
+		} catch (final JAXBException | SAXException ex) {
 			throw new IllegalArgumentException("Can't create JAXB context", ex);
 		}
 	}

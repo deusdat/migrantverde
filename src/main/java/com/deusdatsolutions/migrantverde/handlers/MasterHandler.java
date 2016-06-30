@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.arangodb.ArangoDriver;
+import com.arangodb.ArangoException;
 import com.deusdatsolutions.migrantverde.Action;
 import com.deusdatsolutions.migrantverde.MigrationContext;
+import com.deusdatsolutions.migrantverde.MigrationException;
 import com.deusdatsolutions.migrantverde.jaxb.CollectionOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
@@ -57,7 +59,11 @@ public class MasterHandler {
 		}
 
 		handler = this.handlers.get(migrationConfig.getClass());
-		handler.migrate(migrationConfig, driver);
+		try {
+			handler.migrate(migrationConfig, driver);
+		} catch (final ArangoException e) {
+			throw new MigrationException("Could migrate: " + migrationConfig, e);
+		}
 	}
 
 	private Object input(final Down down) {
