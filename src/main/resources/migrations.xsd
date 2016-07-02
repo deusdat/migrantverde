@@ -3,7 +3,7 @@
 	targetNamespace="http://deusdatsolutions.com/projects/migrations/">
 
 	<complexType name="OperationType" abstract="true">
-		<attribute type="tns:ActionType" name="action" />
+		<attribute type="tns:ActionType" name="action" use="required"/>
 	</complexType>
 
 	<simpleType name="ActionType">
@@ -11,6 +11,16 @@
 			<enumeration value="create" />
 			<enumeration value="drop" />
 			<enumeration value="modify" />
+		</restriction>
+	</simpleType>
+
+	<simpleType name="IndexKindType">
+		<restriction base="string">
+			<enumeration value="cap" />
+			<enumeration value="geo" />
+			<enumeration value="hash" />
+			<enumeration value="fulltext" />
+			<enumeration value="skiplist" />
 		</restriction>
 	</simpleType>
 
@@ -25,6 +35,21 @@
 	<complexType name="CollectionOperationType">
 		<complexContent>
 			<extension base="tns:NamedOperationType"></extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="IndexOperationType">
+		<complexContent>
+			<extension base="tns:NamedOperationType">
+				<sequence>
+					<element name="field" type="string" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+				<attribute name="unique" type="boolean" default="false" />
+				<attribute name="sparse" type="boolean" default="false" />
+				<attribute name="minLength" type="integer" default="3" />
+				<attribute name="size" type="integer" />
+				<attribute name="type" type="tns:IndexKindType" />
+			</extension>
 		</complexContent>
 	</complexType>
 
@@ -56,6 +81,7 @@
 			<element name="database" type="tns:DatabaseOperationType" />
 			<element name="collection" type="tns:CollectionOperationType" />
 			<element name="aql" type="tns:AqlOperationType" />
+			<element name="index" type="tns:IndexOperationType" />
 		</choice>
 	</group>
 

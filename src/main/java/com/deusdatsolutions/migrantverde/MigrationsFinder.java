@@ -13,7 +13,7 @@ import java.util.TreeSet;
 import java.util.stream.Stream;
 
 public class MigrationsFinder {
-	public SortedSet<Path> migrations(final String root) {
+	public SortedSet<Path> migrations(final String root, final Action action) {
 		final TreeSet<Path> result = new TreeSet<Path>();
 		try {
 			final URI uri = MigrationsFinder.class.getResource(root).toURI();
@@ -35,6 +35,6 @@ public class MigrationsFinder {
 		} catch (final Exception ex) {
 			throw new IllegalArgumentException("Could not load resources from " + root, ex);
 		}
-		return result;
+		return action == Action.MIGRATION ? result : result.descendingSet();
 	}
 }

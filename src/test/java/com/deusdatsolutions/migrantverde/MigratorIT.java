@@ -2,6 +2,9 @@ package com.deusdatsolutions.migrantverde;
 
 import static org.junit.Assert.*;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -14,12 +17,18 @@ import com.arangodb.ArangoHost;
 import com.arangodb.entity.BaseDocument;
 import com.arangodb.entity.CollectionEntity;
 import com.arangodb.entity.DocumentEntity;
+import com.arangodb.entity.IndexEntity;
+import com.arangodb.entity.IndexType;
+import com.arangodb.entity.IndexesEntity;
 
 /**
  * This is an integration test to make sure that the system can run a full migration set. You must specify the following
  * environment parameters: migrationUser, migrationPassword, arangoHost.
  * 
  * This is a ground up set of tests. It purposely jacks with the database to make sure it's working from a clean slate.
+ * 
+ * Pay close attention to the annotation. All instance methods are ran in alphabetical order. This is to do things like
+ * create the DB from scratch and then try to re-run the same migration over it.
  * 
  * @author J Patrick Davenport
  *
@@ -59,11 +68,11 @@ public class MigratorIT {
 	}
 
 	@Test
-	public void createSimpleDatabase() throws ArangoException {
+	public void a() throws ArangoException {
 		final Migrator m = new Migrator(DRIVER, Action.MIGRATION);
 		final int executed = m.migrate("/full");
 
-		assertEquals("Should have executed migrations", 3, executed);
+		assertEquals("Should have executed migrations", 4, executed);
 
 		// And now for the actual test!
 		final CollectionEntity user = DRIVER.getCollection("Users"); // <-- See full/2.xml for this setting.
@@ -72,10 +81,24 @@ public class MigratorIT {
 		final DocumentEntity<BaseDocument> document = DRIVER.getDocument("Users", "dotWarner", BaseDocument.class);
 		final String docName = (String) document.getEntity().getAttribute("name");
 		assertEquals("Should be Dot", "Princess Angelina Contessa Louisa Francesca Banana Fanna Bo Besca III", docName);
+
+		final IndexesEntity indexes = DRIVER.getIndexes("Users");
+		assertEquals(2, indexes.getIndexes().size());
+
+		final IndexEntity indexEntity = indexes.getIndexes().get(1);
+		final List<String> expectedFields = new LinkedList<>();
+		expectedFields.add("name");
+		assertEquals("Should find expected field of name", expectedFields, indexEntity.getFields());
+		assertEquals("Should have created a hash index", indexEntity.getType(), IndexType.HASH);
 	}
 
+	/**
+	 * Re-executes the migration to make sure that nothing actually runs because all the migration steps were applied.
+	 * 
+	 * @throws ArangoException
+	 */
 	@Test
-	public void runDup() throws ArangoException {
+	public void b() throws ArangoException {
 		final Migrator m = new Migrator(DRIVER, Action.MIGRATION);
 		final int executedMigrations = m.migrate("/full");
 

@@ -27,6 +27,7 @@ public class Migrator {
 	private final ArangoDriver driver;
 	private final Action action;
 	private boolean fullMigration;
+	private final Object endMigration;
 
 	public Migrator(final ArangoDriver driver,
 					final Action action) {
@@ -36,10 +37,11 @@ public class Migrator {
 		this.finder = new MigrationsFinder();
 		this.deserializier = new Deserializier();
 		this.handler = new MasterHandler(action, driver);
+		endMigration = null;
 	}
 
 	public int migrate(final String migrationRoot) {
-		final SortedSet<Path> migrations = finder.migrations(migrationRoot);
+		final SortedSet<Path> migrations = finder.migrations(migrationRoot, this.action);
 		fullMigration = isFullMigration(migrations.first());
 		int executed = 0;
 		for (final Path p : migrations) {

@@ -11,6 +11,7 @@ import com.deusdatsolutions.migrantverde.MigrationContext;
 import com.deusdatsolutions.migrantverde.MigrationException;
 import com.deusdatsolutions.migrantverde.jaxb.CollectionOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType;
+import com.deusdatsolutions.migrantverde.jaxb.IndexOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType.Down;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType.Up;
@@ -26,7 +27,8 @@ public class MasterHandler {
 	static {
 		HANDLERS.put(CollectionOperationType.class, new CollectionHandler());
 		HANDLERS.put(DatabaseOperationType.class, new DatabaseHandler());
-		HANDLERS.put(String.class, new AqlHandler()); // So awkward. Thanks JAXB!
+		HANDLERS.put(IndexOperationType.class, new IndexHandler());
+		HANDLERS.put(String.class, new AqlHandler());
 	}
 
 	private final Map<Class<?>, IMigrationHandler<?>> handlers;
