@@ -16,7 +16,9 @@ public class MigrationsFinder {
 	public SortedSet<Path> migrations(final String root, final Action action) {
 		final TreeSet<Path> result = new TreeSet<Path>();
 		try {
-			final URI uri = MigrationsFinder.class.getResource(root).toURI();
+			final URI uri = root.startsWith("file://") ? new URI(root)
+					: MigrationsFinder.class.getResource(root).toURI();
+
 			Path myPath;
 			if (uri.getScheme().equals("jar")) {
 				final FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object> emptyMap());

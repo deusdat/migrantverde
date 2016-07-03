@@ -2,6 +2,12 @@ package com.deusdatsolutions.migrantverde;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -113,4 +119,57 @@ public class MigratorIT {
 		assertEquals("Should be Dot", "Princess Angelina Contessa Louisa Francesca Banana Fanna Bo Besca III", docName);
 	}
 
+	@Test
+	public void c() throws ArangoException, IOException {
+		// Copy the migrations from the full and after, to make sure that we only migrate 2.
+		final File tmpFile = File.createTempFile("arangod", "db");
+		final File tempDir = tmpFile.getParentFile();
+
+		{
+			final URI tempUri = new File(tempDir, "1.xml").toURI();
+			Files.copy(getClass().getResourceAsStream("/full/1.xml"),
+					Paths.get(tempUri),
+					StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		{
+			final URI tempUri = new File(tempDir, "2.xml").toURI();
+			Files.copy(getClass().getResourceAsStream("/full/2.xml"),
+					Paths.get(tempUri),
+					StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		{
+			final URI tempUri = new File(tempDir, "3.xml").toURI();
+			Files.copy(getClass().getResourceAsStream("/full/3.xml"),
+					Paths.get(tempUri),
+					StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		{
+			final URI tempUri = new File(tempDir, "4.xml").toURI();
+			Files.copy(getClass().getResourceAsStream("/full/4.xml"),
+					Paths.get(tempUri),
+					StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		{
+			final URI tempUri = new File(tempDir, "5.xml").toURI();
+			Files.copy(getClass().getResourceAsStream("/after/5.xml"),
+					Paths.get(tempUri),
+					StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		{
+			final URI tempUri = new File(tempDir, "6.xml").toURI();
+			Files.copy(getClass().getResourceAsStream("/after/6.xml"),
+					Paths.get(tempUri),
+					StandardCopyOption.REPLACE_EXISTING);
+		}
+		DRIVER.setDefaultDatabase("IntegrationTestDB");
+		final Migrator m = new Migrator(DRIVER, Action.MIGRATION, "5");
+		final String string = tempDir.toString();
+		final int migrated = m.migrate("file://" + string);
+		assertEquals("Should have performed 2 migrations", 2, migrated);
+	}
 }

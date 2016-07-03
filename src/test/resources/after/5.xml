@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:migration 
+	xmlns:tns="http://deusdatsolutions.com/projects/migrations/" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://deusdatsolutions.com/projects/migrations/ migrations.xsd ">
+  <up>
+  	<index name="Users" type="hash" unique="true" action="create">
+  		<field>age</field>
+  	</index>
+  </up>
+</tns:migration>

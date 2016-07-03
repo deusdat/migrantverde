@@ -27,17 +27,25 @@ public class Migrator {
 	private final ArangoDriver driver;
 	private final Action action;
 	private boolean fullMigration;
+	private final String startingAt;
 
 	public Migrator(final ArangoDriver driver,
 					final Action action) {
+		this(driver, action, null);
+	}
+
+	public Migrator(final ArangoDriver driver,
+	                final Action action,
+	                final String startingAt) {
 		super();
 		this.action = action;
 		this.driver = driver;
 		this.finder = new MigrationsFinder();
 		this.deserializier = new Deserializier();
 		this.handler = new MasterHandler(action, driver);
+		this.startingAt = startingAt;
 	}
-
+	
 	public int migrate(final String migrationRoot) {
 		final SortedSet<Path> migrations = finder.migrations(migrationRoot, this.action);
 		fullMigration = isFullMigration(migrations.first());
@@ -45,6 +53,9 @@ public class Migrator {
 		for (final Path p : migrations) {
 			final MigrationType migration = deserializier.get(p);
 			final String migrationName = p.getFileName().toString().replace(".xml", "");
+			if (startingAt != null && migrationName.compareTo(startingAt) < 0) {
+				continue;
+			}
 			try {
 				if (notApplied(migrationName)) {
 					final MigrationContext migrationContext = new MigrationContext(migrationName, migration);
