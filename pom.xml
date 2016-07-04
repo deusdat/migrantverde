@@ -12,6 +12,7 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<arangoddb.driver>2.7.4</arangoddb.driver>
 		<maven.jaxb.version>2.2</maven.jaxb.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<dependencies>

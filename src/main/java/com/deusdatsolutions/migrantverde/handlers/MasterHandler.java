@@ -9,6 +9,7 @@ import com.arangodb.ArangoException;
 import com.deusdatsolutions.migrantverde.Action;
 import com.deusdatsolutions.migrantverde.MigrationContext;
 import com.deusdatsolutions.migrantverde.MigrationException;
+import com.deusdatsolutions.migrantverde.jaxb.ArangoFunctionType;
 import com.deusdatsolutions.migrantverde.jaxb.CollectionOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.IndexOperationType;
@@ -28,6 +29,7 @@ public class MasterHandler {
 		HANDLERS.put(CollectionOperationType.class, new CollectionHandler());
 		HANDLERS.put(DatabaseOperationType.class, new DatabaseHandler());
 		HANDLERS.put(IndexOperationType.class, new IndexHandler());
+		HANDLERS.put(ArangoFunctionType.class, new FunctionHandler());
 		HANDLERS.put(String.class, new AqlHandler());
 	}
 

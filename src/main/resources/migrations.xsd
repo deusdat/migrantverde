@@ -3,7 +3,7 @@
 	targetNamespace="http://deusdatsolutions.com/projects/migrations/">
 
 	<complexType name="OperationType" abstract="true">
-		<attribute type="tns:ActionType" name="action" use="required"/>
+		<attribute type="tns:ActionType" name="action" use="required" />
 	</complexType>
 
 	<simpleType name="ActionType">
@@ -42,7 +42,8 @@
 		<complexContent>
 			<extension base="tns:NamedOperationType">
 				<sequence>
-					<element name="field" type="string" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="field" type="string" minOccurs="0"
+						maxOccurs="unbounded" />
 				</sequence>
 				<attribute name="unique" type="boolean" default="false" />
 				<attribute name="sparse" type="boolean" default="false" />
@@ -74,6 +75,10 @@
 		<restriction base="string"></restriction>
 	</simpleType>
 
+	<complexType name="ArangoFunctionType">
+			<attribute name="class" type="string"></attribute>
+	</complexType>
+
 	<element name="migration" type="tns:MigrationType"></element>
 
 	<group name="OperationsGroup">
@@ -82,6 +87,7 @@
 			<element name="collection" type="tns:CollectionOperationType" />
 			<element name="aql" type="tns:AqlOperationType" />
 			<element name="index" type="tns:IndexOperationType" />
+			<element name="function" type="tns:ArangoFunctionType" />
 		</choice>
 	</group>
 

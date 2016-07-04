@@ -166,10 +166,16 @@ public class MigratorIT {
 					Paths.get(tempUri),
 					StandardCopyOption.REPLACE_EXISTING);
 		}
+		{
+			final URI tempUri = new File(tempDir, "7.xml").toURI();
+			Files.copy(getClass().getResourceAsStream("/after/7.xml"),
+					Paths.get(tempUri),
+					StandardCopyOption.REPLACE_EXISTING);
+		}
 		DRIVER.setDefaultDatabase("IntegrationTestDB");
 		final Migrator m = new Migrator(DRIVER, Action.MIGRATION, "5");
 		final String string = tempDir.toString();
 		final int migrated = m.migrate("file://" + string);
-		assertEquals("Should have performed 2 migrations", 2, migrated);
+		assertEquals("Should have performed 2 migrations", 3, migrated);
 	}
 }
