@@ -24,7 +24,7 @@ public class Main {
 	 * Allows a user to run a migration from the CLI.
 	 * 
 	 * @param args
-	 *            - requires one entry, the path to the property file.
+	 *            requires one entry, the path to the property file.
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
