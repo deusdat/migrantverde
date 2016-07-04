@@ -20,7 +20,7 @@ collections and now you're adding to it. It can ALSO be both. You can start a mi
 places in the migration list. So for a new developer, the system will migrate from create database -> production mirror.
 For production you can start 20 migration steps later and move forward.
 
-## XML Operations.
+## XML Operations
 An XML instance follows the schema found in the project at /migrations.xsd. Presently you can create/delete a 
 collection, index and database. You can also run arbitrary non-parameterized AQL and arbitrary Java code against your 
 driver. These are defined in the XSD entry **OperationsGroup**. 
@@ -37,9 +37,9 @@ Up/Down are carried over from [Waller](https://github.com/deusdat/waller). Our t
 
 ## From the CLI
 While the library makes it easy for Java compatible apps to migrate their DBs, it can be used by the larger community. 
-The library is executable. You'll still need a JVM 1.7+ installed.
+You'll still need a JVM 1.7+ installed.
 
-java -jar migrantverde-0.0.1.jar /path/to/config/file.properties.
+java -cp "/path/to/Arango/Driver.jar" com.deusdatsolutions.migrantverde.Main /path/to/config/file.properties.
 
 The configuration file needs the following key-value pairs.
 
@@ -53,3 +53,8 @@ The configuration file needs the following key-value pairs.
 
 When running a full migration, you need to provide credentials that can create a database. From our use root is a good
 option. 
+
+The library does not directly download a copy of the ArangoDB Java driver. Please get the latest driver from Arango's site. Include it in the -cp argument as above.
+
+## Using the library
+The library is not yet in a central Maven repository. You can download the latest version in the release directory of this repo. You can also build it from scratch using Maven.

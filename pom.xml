@@ -83,7 +83,8 @@
 						<source>src/main/resources/migrations.xsd</source>
 					</sources>
 					<!-- The package of your generated sources -->
-					<packageName>com.deusdatsolutions.migrantverde.jaxb</packageName>
+					<packageName>
+						com.deusdatsolutions.migrantverde.jaxb</packageName>
 				</configuration>
 			</plugin>
 		</plugins>
