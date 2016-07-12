@@ -1,13 +1,19 @@
 # Migrant Verde
-A schema evolution tool for ArangoDB. Centralize your collections, indecies, and data transformations in source control. Automatically update your database when you deploy from within your application.
+A schema evolution tool for [ArangoDB](https://arangodb.com/). Manage your collections, indices, and data transformations in a centralized way in your source control along with your application.
 
-It's a light weight library that only requires ArangoDB's Java driver and Java 1.7+. It doesn't bring any other depenencies into your project. In fact, with the command line interface, you don't even have to bring it into your project!
+Migrant Verde automatically updates the databases of your installations when you deploy updates of your application to developer, CI or production systems.
 
-The goal behind the project is to apply to ArangoDB years of hard fought lessons (especially those that kicked us in the teeth). We needed a schema version manager that could create a database, add all of the collections, indexes and data population necessary for a developer to create a local VM of ArangoDB that looks like a mini-production. The system should automatically adjust to merges. At the same time, we need a way to downgrade changes when they prove to be troublesome. While providing all of this, it must also support the neat features we all know and chose ArangoDB for: distributed systems. This means that we can't rely on creating the collection if it doesn't exist when inserting a document.
+Migrant Verde comes as a light weight library that only depends on [ArangoDB's Java driver](https://www.arangodb.com/arangodb-drivers/) and Java 1.7+. It doesn't bring any other depenencies into your project. If you decide to go with Migrant Verdes CLI as standalone tool, you don't even have to bring it into your project!
+
+The goal behind the project is to apply to ArangoDB years of hard fought lessons (especially those that kicked us in the teeth). We needed a schema version manager that could create a database, add all of the collections, indexes and data population necessary for a developer to create a local VM of ArangoDB that looks like a mini-production. The system should automatically adjust to merges. At the same time, we need a way to downgrade changes when they prove to be troublesome. While providing all of this, it must also support the neat features we all know and chose ArangoDB for: sharding collections on distributed systems. This means that we can't rely on creating the collection automatically if it doesn't exist when inserting a document. Sometimes collections should come preloaded with some documents from start.
+
+Similar processes can be established on other database engines using [Liquibase](https://en.wikipedia.org/wiki/Liquibase)
 
 ## Learning by doing (Building a migration set)
-Step Zero: install a copy of ArangoDB into your favorite VM. While this is not actually required, we're proponents of the 12-factor approach to software development. We agree that developers should be as close to production environments as possible. Hence a VM. When you do this, pay attention to the root password you use for ArangoDB. This is different than root for your VM. 
+### Instanciating a new environment
+Step Zero: install a copy of ArangoDB into your favorite VM. While this is not actually required, we're proponents of the [12-factor approach to software development](http://12factor.net/). We agree that developers should be as close to production environments as possible. Hence a VM with the same OS as the production environment will have. This eases the process of contineous delivery, since missing or unavailable dependencies on the system will occur during the development. When you deploy ArangoDB, pay attention to the root password you use for ArangoDB. This is different than root for your VM. 
 
+### Creating a database with access 
 The first thing that we'll want to do is **create a database**. As you'll see later, Migrant Verde uses XML as our lingua franca. Let's name this file "**1.xml**".
 
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -28,6 +34,7 @@ This creates a new database within Arango named IntegrationTestDB. It also creat
 
 (You might be saying to yourself, "Did that example really have me put a username and password in the repository?" To which we reply, yea. Don't do that. There's an enhancement ticket pending to fix this. Until then, you can skip the user creation at this time and create user later using a different feature supported by Migrant Verde. You could even do it in a file named "1.5.xml")
 
+### Creating Collections
 Now that you've got a database, you'll want collections. Databases love collections. Like most apps you want something that holds user information. Let's call that collection "Users". Let's name this file "**2.xml**".
 
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -43,6 +50,7 @@ While totally ignored in the first step, let's discuss the details of the XML. A
 
 The collection tag takes two attributes: name and action. The name is the name for the collection. The action can be "create", "drop" or "modify". At present collection doesn't do anything with modify. Create and drop are self-explanatory.
 
+### Executing AQL
 With our collection ready, let's add a user. To do this we'll leverage the ability to run arbitrary AQL. Let's name this "**3.xml**".
 
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -59,6 +67,7 @@ With our collection ready, let's add a user. To do this we'll leverage the abili
 	
 You'll need to use the &lt;aql&gt; tag. This tag takes a single AQL statement. While this example is rather simple, you can use it to migrate whole collections at a time. You can add new attributes to documents, split them, etc. The only limit is that the operation has to work within the current database.
 
+### Manipulating Collection Attributes
 Finally, let's apply an index to the collection on the attribute name. We'll name this file "**4.xml**".
 
 	<?xml version="1.0" encoding="UTF-8"?>
@@ -112,7 +121,7 @@ First, we've been asked, "Why XML?" Our reason is that XML is natively supported
 
 An XML instance follows the schema found in the project at /migrations.xsd. Presently you can create/delete a collection, index and database. You can also run arbitrary non-parameterized AQL and arbitrary Java code against your driver. These are defined in the XSD entry **OperationsGroup**. 
 
-## From the CLI
+## Invoking From the CLI
 While the library makes it easy for Java compatible apps to migrate their DBs, it can be used by the larger community. 
 You'll still need a JVM 1.7+ installed.
 
