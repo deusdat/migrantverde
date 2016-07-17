@@ -3,6 +3,12 @@ package com.deusdatsolutions.migrantverde.handlers;
 import com.arangodb.ArangoDriver;
 import com.arangodb.ArangoException;
 
+/**
+ * Supports converting an AQL configuration into a realized executiong.
+ * 
+ * @author J Patrick Davenport
+ *
+ */
 public class AqlHandler implements IMigrationHandler<String> {
 
 	@Override

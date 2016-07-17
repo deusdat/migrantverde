@@ -18,7 +18,8 @@ import com.deusdatsolutions.migrantverde.jaxb.MigrationType.Down;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType.Up;
 
 /**
- * The touch point for all of the specific handlers like CollectionHandler.
+ * The touch point for all of the specific handlers like CollectionHandler. Essentially a multi-method implementation
+ * like one finds in Clojure.
  * 
  * @author J Patrick Davenport
  *

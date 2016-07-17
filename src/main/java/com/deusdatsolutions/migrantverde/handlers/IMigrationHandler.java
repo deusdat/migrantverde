@@ -3,6 +3,13 @@ package com.deusdatsolutions.migrantverde.handlers;
 import com.arangodb.ArangoDriver;
 import com.arangodb.ArangoException;
 
+/**
+ * A command pattern for reacting to various migration configurations.
+ * 
+ * @author J Patrick Davenport
+ *
+ * @param <T>
+ */
 public interface IMigrationHandler<T> {
 	/**
 	 * A standard way that the migrations will be applied.

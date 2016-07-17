@@ -5,6 +5,12 @@ import com.arangodb.ArangoException;
 import com.deusdatsolutions.migrantverde.ArangoDbFunction;
 import com.deusdatsolutions.migrantverde.jaxb.ArangoFunctionType;
 
+/**
+ * Converter that allows the user to run an arbitrary Java method against the database.
+ * 
+ * @author J Patrick Davenport
+ *
+ */
 public class FunctionHandler implements IMigrationHandler<ArangoFunctionType> {
 
 	@Override

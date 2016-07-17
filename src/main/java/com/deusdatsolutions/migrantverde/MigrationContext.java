@@ -2,6 +2,12 @@ package com.deusdatsolutions.migrantverde;
 
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
 
+/**
+ * DTO for passing execution configuration.
+ * 
+ * @author J Patrick Davenport
+ *
+ */
 public class MigrationContext {
 	private final String migrationVersion;
 	private final MigrationType migration;

@@ -13,6 +13,12 @@ import com.deusdatsolutions.migrantverde.jaxb.ActionType;
 import com.deusdatsolutions.migrantverde.jaxb.IndexKindType;
 import com.deusdatsolutions.migrantverde.jaxb.IndexOperationType;
 
+/**
+ * Reactor for the index configuration.
+ * 
+ * @author J Patrick Davenport
+ *
+ */
 public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 
 	@Override

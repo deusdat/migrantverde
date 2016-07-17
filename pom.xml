@@ -23,6 +23,17 @@
 		<developerConnection>scm:git:git@github.com/deusdat/migrantverde.git</developerConnection>
 	</scm>
 
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
 	<developers>
 		<developer>
 			<email>patrick.davenport@deusdatsolutions.com</email>
@@ -67,6 +78,17 @@
 	</dependencies>
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
 			<!-- Runs our integration tests. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -81,11 +103,22 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- Generates our Javadocs -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<configuration>
+					<show>private</show>
+					<nohelp>true</nohelp>
+				</configuration>
+			</plugin>
+			<!-- Signs the documents. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
 				<configuration>
-					<keyname>6A8BEC13</keyname>
+					<keyname>25C8C775</keyname>
 				</configuration>
 				<executions>
 					<execution>
@@ -93,6 +126,20 @@
 						<phase>verify</phase>
 						<goals>
 							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Creates the jar. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -120,4 +167,5 @@
 			</plugin>
 		</plugins>
 	</build>
+	<url>https://github.com/deusdat/migrantverde</url>
 </project>

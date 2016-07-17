@@ -12,6 +12,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+/**
+ * Component that searches the path for children documents.
+ * 
+ * @author J Patrick Davenport
+ *
+ */
 public class MigrationsFinder {
 	public SortedSet<Path> migrations(final String root, final Action action) {
 		final TreeSet<Path> result = new TreeSet<Path>();

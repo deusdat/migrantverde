@@ -5,6 +5,12 @@ import com.arangodb.ArangoException;
 import com.arangodb.entity.CollectionOptions;
 import com.deusdatsolutions.migrantverde.jaxb.CollectionOperationType;
 
+/**
+ * Applies the logic for operating on collection tags.
+ * 
+ * @author J Patrick Davenport
+ *
+ */
 public class CollectionHandler implements IMigrationHandler<CollectionOperationType> {
 
 	@Override

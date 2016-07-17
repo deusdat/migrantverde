@@ -17,6 +17,12 @@ import org.xml.sax.SAXException;
 
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
 
+/**
+ * Reads the configuration files. Enforces the XSD specified in the resources directory.
+ * 
+ * @author J Patrick Davenport
+ *
+ */
 public class Deserializier {
 	private final JAXBContext ctx;
 	private final Unmarshaller jaxbUnmarshaller;

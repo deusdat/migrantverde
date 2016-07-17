@@ -14,6 +14,12 @@ import com.arangodb.entity.StringsResultEntity;
 import com.deusdatsolutions.migrantverde.handlers.MasterHandler;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
 
+/**
+ * Driver class for the library. Executes all of the migrations.
+ * 
+ * @author J Patrick Davenport
+ *
+ */
 public class Migrator {
 	private static final String MIGRATION_COLLECTION = "MigrantVerde";
 	//@formatter:off

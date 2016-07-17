@@ -10,7 +10,7 @@ import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType.User;
 
 /**
- * 
+ * Reactor to the database tag.
  * 
  * @author J Patrick Davenport
  *
