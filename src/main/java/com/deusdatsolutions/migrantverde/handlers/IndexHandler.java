@@ -41,7 +41,7 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 		final IndexesEntity indexes = driver.getIndexes(collName);
 		for (final IndexEntity ie : indexes.getIndexes()) {
 			final IndexEntityWrapper wrapper = new IndexEntityWrapper(ie);
-			if (this.equals(wrapper)) {
+			if (migration.equals(wrapper)) {
 				driver.deleteIndex(ie.getId());
 				break;
 			}
@@ -104,6 +104,9 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 
 		public IndexEntityWrapper(final IndexEntity ie) {
 			super();
+			if (ie == null) {
+				throw new NullPointerException("IndexEntity can't be null");
+			}
 			this.ie = ie;
 		}
 
@@ -157,6 +160,11 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 				result = this.getType() == in.getType() & this.getField().equals(in.getField());
 			}
 			return result;
+		}
+
+		@Override
+		public int hashCode() {
+			return this.ie.hashCode();
 		}
 	}
 }
