@@ -4,7 +4,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://deusdatsolutions.com/projects/migrations/ migrations.xsd ">
 	<up>
-		<function
-			class="com.deusdatsolutions.migrantverde.handlers.CredentialInserter" />
+		<aql>
+			FOR u IN Users
+			UPDATE u WITH {preferedBeer: 'America'} IN Users
+		</aql>
 	</up>
 </tns:migration>
