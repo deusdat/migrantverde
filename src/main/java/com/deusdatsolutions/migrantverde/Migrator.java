@@ -52,13 +52,25 @@ public class Migrator {
 		this.startingAt = startingAt;
 	}
 	
+	public int migrate(final String...migrationRoots) {
+		if (migrationRoots == null || migrationRoots.length == 0) {
+			return 0;
+		} else {
+			int migrations = 0;
+			for(final String migration : migrationRoots) {
+				migrations += migrate(migration);
+			}
+			return migrations;
+		}		
+	}
+	
 	public int migrate(final String migrationRoot) {
 		final SortedSet<Path> migrations = finder.migrations(migrationRoot, this.action);
 		fullMigration = isFullMigration(migrations.first());
 		int executed = 0;
 		for (final Path p : migrations) {
 			final MigrationType migration = deserializier.get(p);
-			final String migrationName = p.getFileName().toString().replace(".xml", "");
+			final String migrationName = getMigrationName(p);
 			if (startingAt != null && migrationName.compareTo(startingAt) < 0) {
 				continue;
 			}
@@ -74,6 +86,14 @@ public class Migrator {
 			}
 		}
 		return executed;
+	}
+
+	private String getMigrationName(final Path p) {
+		final Path fileName = p.getFileName();
+		if(fileName == null) {
+			throw new IllegalArgumentException("Path didn't have a file name " + p);
+		}
+		return fileName.toString().replace(".xml", "");
 	}
 	
 	private boolean isFullMigration(final Path first) {

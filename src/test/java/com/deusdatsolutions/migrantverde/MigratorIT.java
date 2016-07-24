@@ -178,4 +178,11 @@ public class MigratorIT {
 		final int migrated = m.migrate("file://" + string);
 		assertEquals("Should have performed 2 migrations", 3, migrated);
 	}
+
+	@Test
+	public void d() {
+		final Migrator m = new Migrator(DRIVER, Action.MIGRATION);
+		final int executedMigrations = m.migrate("/migrations/one", "/migrations/two");
+		assertEquals("Should have migrated two files", 2, executedMigrations);
+	}
 }
