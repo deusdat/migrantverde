@@ -4,7 +4,7 @@
 
 	<groupId>com.deusdatsolutions</groupId>
 	<artifactId>migrantverde</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 
 	<name>Migrant Verde</name>
 	<description>Schema evolution manager for ArangoDB</description>
@@ -79,6 +79,31 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<environmentVariables>
+						<ARANGODB_URL>http://somewherenice.com</ARANGODB_URL>
+						<ENV1>kitty</ENV1>
+						<ONE>Two</ONE>
+						<SOMETHING>else</SOMETHING>
+					</environmentVariables>
+					<systemProperties>
+						<Prop1>timmy</Prop1>
+						<Prop8>Rights for human like robots</Prop8>
+					</systemProperties>
+			</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.surefire</groupId>
+						<artifactId>surefire-junit47</artifactId>
+						<version>2.19.1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<!-- Pushes the artifact to Sonatypes -->
+			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
 				<version>1.6.7</version>
@@ -94,6 +119,18 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<version>2.19.1</version>
+				<configuration>
+					<environmentVariables>
+						<ARANGODB_URL>http://somewherenice.com</ARANGODB_URL>
+						<ENV1>kitty</ENV1>
+						<ONE>Two</ONE>
+						<SOMETHING>else</SOMETHING>
+					</environmentVariables>
+					<systemProperties>
+						<Prop1>timmy</Prop1>
+						<Prop8>Rights for human like robots</Prop8>
+					</systemProperties>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
