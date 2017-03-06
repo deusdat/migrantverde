@@ -1,6 +1,7 @@
 package com.deusdatsolutions.migrantverde.handlers;
 
 import java.util.List;
+import java.util.Map;
 
 import com.arangodb.ArangoDriver;
 import com.arangodb.ArangoException;
@@ -9,6 +10,8 @@ import com.deusdatsolutions.migrantverde.jaxb.ActionType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType.User;
 
+import static com.deusdatsolutions.migrantverde.handlers.Replacer.replaceAll;
+
 /**
  * Reactor to the database tag.
  * 
@@ -16,6 +19,12 @@ import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType.User;
  *
  */
 public class DatabaseHandler implements IMigrationHandler<DatabaseOperationType> {
+
+	private Map<String, String> lookup;
+	
+	public DatabaseHandler(Map<String, String> lookup) {
+		this.lookup = lookup;
+	}
 
 	@Override
 	public void migrate(final DatabaseOperationType migration, final ArangoDriver driver) throws ArangoException {
@@ -27,7 +36,9 @@ public class DatabaseHandler implements IMigrationHandler<DatabaseOperationType>
 			final UserEntity[] withAccess = new UserEntity[users.size()];
 			int i = 0;
 			for (final User u : users) {
-				final UserEntity ue = new UserEntity(u.getUsername(), u.getPassword(), true, null);
+				String username = replaceAll(u.getUsername(), this.lookup);
+				String password = replaceAll(u.getPassword(), this.lookup);
+				final UserEntity ue = new UserEntity(username, password, true, null);
 				withAccess[i] = ue;
 				i++;
 			}

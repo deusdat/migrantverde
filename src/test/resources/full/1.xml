@@ -5,8 +5,8 @@
 	<up>
 		<database name="IntegrationTestDB" action="create">
 			<user>
-				<username>Timmy</username>
-				<password>KosmoAndWanda</password>
+				<username>${username}</username>
+				<password>${password}</password>
 			</user>
 		</database>
 	</up>

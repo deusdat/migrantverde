@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://deusdatsolutions.com/projects/migrations/ migrations.xsd ">
   <up>
   	<aql>
-  		INSERT {name : "Princess Angelina Contessa Louisa Francesca Banana Fanna Bo Besca III", age: 14, "_key" : "dotWarner"} IN Users
+  		INSERT {name : "Princess Angelina Contessa Louisa Francesca Banana Fanna Bo Besca III", age: 14, "_key" : "dotWarner", "petsname" : "${petsname}"} IN Users
   	</aql>
   </up>
 </tns:migration>

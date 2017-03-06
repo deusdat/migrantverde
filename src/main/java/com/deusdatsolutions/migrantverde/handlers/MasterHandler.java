@@ -18,34 +18,54 @@ import com.deusdatsolutions.migrantverde.jaxb.MigrationType.Down;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType.Up;
 
 /**
- * The touch point for all of the specific handlers like CollectionHandler. Essentially a multi-method implementation
- * like one finds in Clojure.
+ * The touch point for all of the specific handlers like CollectionHandler.
+ * Essentially a multi-method implementation like one finds in Clojure.
  * 
  * @author J Patrick Davenport
  *
  */
 public class MasterHandler {
-	private static final Map<Class<?>, IMigrationHandler<?>> HANDLERS = new HashMap<>();
-	static {
-		HANDLERS.put(CollectionOperationType.class, new CollectionHandler());
-		HANDLERS.put(DatabaseOperationType.class, new DatabaseHandler());
-		HANDLERS.put(IndexOperationType.class, new IndexHandler());
-		HANDLERS.put(ArangoFunctionType.class, new FunctionHandler());
-		HANDLERS.put(String.class, new AqlHandler());
-	}
 
 	private final Map<Class<?>, IMigrationHandler<?>> handlers;
 	private final Action action;
 	private final ArangoDriver driver;
 
-	public MasterHandler(	final Action action,
-							final ArangoDriver driver) {
-		this(HANDLERS, action, driver);
+	private static Map<Class<?>, IMigrationHandler<?>> createHandlers(Map<String, String> lookup) {
+		final Map<Class<?>, IMigrationHandler<?>> HANDLERS = new HashMap<>();
+		HANDLERS.put(	CollectionOperationType.class,
+						new CollectionHandler());
+		HANDLERS.put(	DatabaseOperationType.class,
+						new DatabaseHandler(lookup));
+		HANDLERS.put(	IndexOperationType.class,
+						new IndexHandler());
+		HANDLERS.put(	ArangoFunctionType.class,
+						new FunctionHandler());
+		HANDLERS.put(	String.class,
+						new AqlHandler(lookup));
+		return HANDLERS;
 	}
 
-	public MasterHandler(	final Map<Class<?>, IMigrationHandler<?>> testable,
-							final Action action,
-							final ArangoDriver driver) {
+	public MasterHandler(	final Action action,
+							final ArangoDriver driver ) {
+		this(createHandlers(new HashMap<String, String>()), action, driver);
+	}
+
+	public MasterHandler(	final Action action,
+							final ArangoDriver driver,
+							final Map<String, String> lookup ) {
+		this(createHandlers(lookup), action, driver);
+	}
+
+	/**
+	 * Constructor that allows the handlers to be overridden.
+	 * 
+	 * @param testable
+	 * @param action
+	 * @param driver
+	 */
+	protected MasterHandler(	final Map<Class<?>, IMigrationHandler<?>> testable,
+								final Action action,
+								final ArangoDriver driver ) {
 		this.handlers = testable;
 		this.action = action;
 		this.driver = driver;
@@ -65,7 +85,8 @@ public class MasterHandler {
 
 		handler = this.handlers.get(migrationConfig.getClass());
 		try {
-			handler.migrate(migrationConfig, driver);
+			handler.migrate(migrationConfig,
+							driver);
 		} catch (final ArangoException e) {
 			throw new MigrationException("Could migrate: " + migrationConfig, e);
 		}
@@ -80,8 +101,9 @@ public class MasterHandler {
 	}
 
 	/**
-	 * Finds the first non-null getter value. Since the XSD says you can only have one such field in the up or down
-	 * slots, we're protected from having to chose.
+	 * Finds the first non-null getter value. Since the XSD says you can only
+	 * have one such field in the up or down slots, we're protected from having
+	 * to chose.
 	 * 
 	 * @param in
 	 * @return the

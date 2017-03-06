@@ -22,11 +22,10 @@ import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
  */
 public class Migrator {
 	private static final String MIGRATION_COLLECTION = "MigrantVerde";
-	//@formatter:off
+	// @formatter:off
 	private static final String MIGRATION_APPLIED_QUERY = "FOR m IN " + MIGRATION_COLLECTION
-														+ "  FILTER m.action == @action AND m.name == @name " 
-														+ "RETURN m";
-	//@formatter:off
+			+ "  FILTER m.action == @action AND m.name == @name " + "RETURN m";
+	// @formatter:off
 	private final MigrationsFinder finder;
 	private final Deserializier deserializier;
 	private final MasterHandler handler;
@@ -35,37 +34,51 @@ public class Migrator {
 	private boolean fullMigration;
 	private final String startingAt;
 
-	public Migrator(final ArangoDriver driver,
-					final Action action) {
-		this(driver, action, null);
+	public Migrator(	final ArangoDriver driver,
+						final Action action ) {
+		this(driver, action, null, new HashMap<String, String>());
 	}
 
-	public Migrator(final ArangoDriver driver,
-	                final Action action,
-	                final String startingAt) {
+	public Migrator(	final ArangoDriver driver,
+						final Action action,
+						final Map<String, String> lookup ) {
+		this(driver, action, null, lookup);
+	}
+
+	public Migrator(	final ArangoDriver driver,
+						final Action action,
+						final String startingAt ) {
+		this(driver, action, startingAt, new HashMap<String, String>());
+	}
+
+	public Migrator(	final ArangoDriver driver,
+						final Action action,
+						final String startingAt,
+						Map<String, String> lookup ) {
 		super();
 		this.action = action;
 		this.driver = driver;
 		this.finder = new MigrationsFinder();
 		this.deserializier = new Deserializier();
-		this.handler = new MasterHandler(action, driver);
+		this.handler = new MasterHandler(action, driver, lookup);
 		this.startingAt = startingAt;
 	}
-	
-	public int migrate(final String...migrationRoots) {
+
+	public int migrate(final String... migrationRoots) {
 		if (migrationRoots == null || migrationRoots.length == 0) {
 			return 0;
 		} else {
 			int migrations = 0;
-			for(final String migration : migrationRoots) {
+			for (final String migration : migrationRoots) {
 				migrations += migrate(migration);
 			}
 			return migrations;
-		}		
+		}
 	}
-	
+
 	public int migrate(final String migrationRoot) {
-		final SortedSet<Path> migrations = finder.migrations(migrationRoot, this.action);
+		final SortedSet<Path> migrations = finder.migrations(	migrationRoot,
+																this.action);
 		fullMigration = isFullMigration(migrations.first());
 		int executed = 0;
 		for (final Path p : migrations) {
@@ -90,40 +103,42 @@ public class Migrator {
 
 	private String getMigrationName(final Path p) {
 		final Path fileName = p.getFileName();
-		if(fileName == null) {
+		if (fileName == null) {
 			throw new IllegalArgumentException("Path didn't have a file name " + p);
 		}
-		return fileName.toString().replace(".xml", "");
+		return fileName.toString().replace(	".xml",
+											"");
 	}
-	
+
 	private boolean isFullMigration(final Path first) {
 		final MigrationType migration = deserializier.get(first);
-		return action == Action.MIGRATION && migration.getUp().getDatabase() != null && dbDoesntExit(migration.getUp().getDatabase().getName());
+		return action == Action.MIGRATION && migration.getUp().getDatabase() != null
+				&& dbDoesntExit(migration.getUp().getDatabase().getName());
 	}
 
 	private void initMigrationTracker(final MigrationContext migrationContext) throws ArangoException {
-		if(fullMigration) {
+		if (fullMigration) {
 			final String name = migrationContext.getMigration().getUp().getDatabase().getName();
 			driver.setDefaultDatabase(name);
 		}
 		try {
 			driver.getCollection(MIGRATION_COLLECTION);
 		} catch (final ArangoException e) {
-			if(e.getCode() == 404) {
+			if (e.getCode() == 404) {
 				driver.createCollection(MIGRATION_COLLECTION);
 			}
 		}
 
 		fullMigration = false;
 	}
-	
+
 	private boolean dbDoesntExit(final String name) {
 		boolean result = false;
 		try {
 			final StringsResultEntity databases = driver.getDatabases();
 			result = !databases.getResult().contains(name);
 		} catch (final ArangoException e) {
-			
+
 		}
 		return result;
 	}
@@ -131,31 +146,40 @@ public class Migrator {
 	private void recordMigration(final MigrationContext migrationContext) throws ArangoException {
 		initMigrationTracker(migrationContext);
 		final BaseDocument bd = new BaseDocument();
-		bd.addAttribute("name", migrationContext.getMigrationVersion());
-		bd.addAttribute("action", action);
-		bd.addAttribute("applied", new Date());
-		driver.createDocument(MIGRATION_COLLECTION, bd);
+		bd.addAttribute("name",
+						migrationContext.getMigrationVersion());
+		bd.addAttribute("action",
+						action);
+		bd.addAttribute("applied",
+						new Date());
+		driver.createDocument(	MIGRATION_COLLECTION,
+								bd);
 	}
-	
+
 	private boolean notApplied(final String migrationName) throws ArangoException {
-		if(fullMigration) {
+		if (fullMigration) {
 			return true;
 		}
 		final Map<String, Object> params = new HashMap<>();
-		params.put("action", action);
-		params.put("name", migrationName);
+		params.put(	"action",
+					action);
+		params.put(	"name",
+					migrationName);
 		CursorResult<BaseDocument> result = null;
 		int countSize = -1;
 		try {
-			result = driver.executeAqlQuery(MIGRATION_APPLIED_QUERY, params, null, BaseDocument.class);
+			result = driver.executeAqlQuery(MIGRATION_APPLIED_QUERY,
+											params,
+											null,
+											BaseDocument.class);
 			final BaseDocument uniqueResult = result.getUniqueResult();
 			countSize = uniqueResult == null ? 0 : -1;
 		} finally {
-			if(result != null) {
+			if (result != null) {
 				result.close();
 			}
 		}
-		
+
 		return countSize == 0;
 	}
 
