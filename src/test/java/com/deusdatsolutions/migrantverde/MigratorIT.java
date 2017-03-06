@@ -49,12 +49,16 @@ public class MigratorIT {
 	private static final String TEST_DB = "IntegrationTestDB";
 
 	private static final ArangoDriver DRIVER;
+	private static String get(String key) {
+		String value = System.getenv(key);
+		return value == null ? System.getProperty(key) : value;
+	}
 	static {
 		ArangoConfigure ac;
 		ac = new ArangoConfigure();
-		ac.setUser(System.getenv("migrationUser"));
-		ac.setPassword(System.getenv("migrationPassword"));
-		ac.setArangoHost(new ArangoHost(System.getenv("arangoHost"), 8529));
+		ac.setUser(get("migrationUser"));
+		ac.setPassword(get("migrationPassword"));
+		ac.setArangoHost(new ArangoHost(get("arangoHost"), 8529));
 		ac.init();
 		DRIVER = new ArangoDriver(ac);
 	}
