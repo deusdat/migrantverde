@@ -5,7 +5,8 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- * Integration test to make sure that the system can merge environment variables and properties passed to the JVM.
+ * Integration test to make sure that the system can merge environment variables
+ * and properties passed to the JVM.
  * 
  * <p>
  * Environment Variables Required
@@ -32,16 +33,20 @@ public class VariableTest {
 	public void env() {
 
 		final String arangoDB = v.get("ARANGODB_URL");
-		assertEquals("http://somewherenice.com", arangoDB);
+		assertEquals(	"http://somewherenice.com",
+						arangoDB);
 		final String env1 = v.get("ENV1");
-		assertEquals("kitty", env1);
+		assertEquals(	"kitty",
+						env1);
 	}
 
 	@Test
 	public void properties() {
 		final String prop1 = v.get("Prop1");
-		assertEquals("timmy", prop1);
+		assertEquals(	"timmy",
+						prop1);
 		final String prop2 = v.get("Prop8");
-		assertEquals("Rights for human like robots", prop2);
+		assertEquals(	"Rights for human like robots",
+						prop2);
 	}
 }

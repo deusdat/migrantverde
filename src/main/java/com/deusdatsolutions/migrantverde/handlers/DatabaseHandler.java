@@ -21,33 +21,36 @@ import static com.deusdatsolutions.migrantverde.handlers.Replacer.replaceAll;
 public class DatabaseHandler implements IMigrationHandler<DatabaseOperationType> {
 
 	private Map<String, String> lookup;
-	
-	public DatabaseHandler(Map<String, String> lookup) {
+
+	public DatabaseHandler( Map<String, String> lookup ) {
 		this.lookup = lookup;
 	}
 
 	@Override
-	public void migrate(final DatabaseOperationType migration, final ArangoDriver driver) throws ArangoException {
+	public void migrate( final DatabaseOperationType migration, final ArangoDriver driver ) throws ArangoException {
 		final ActionType action = migration.getAction();
 		final String name = migration.getName();
-		switch (action) {
-		case CREATE:
-			final List<User> users = migration.getUser();
-			final UserEntity[] withAccess = new UserEntity[users.size()];
-			int i = 0;
-			for (final User u : users) {
-				String username = replaceAll(u.getUsername(), this.lookup);
-				String password = replaceAll(u.getPassword(), this.lookup);
-				final UserEntity ue = new UserEntity(username, password, true, null);
-				withAccess[i] = ue;
-				i++;
-			}
-			driver.createDatabase(name, withAccess);
-			break;
-		case DROP:
-			break;
-		default:
-			throw new IllegalStateException("Can't handle " + action);
+		switch ( action ) {
+			case CREATE:
+				final List<User> users = migration.getUser();
+				final UserEntity[] withAccess = new UserEntity[users.size()];
+				int i = 0;
+				for ( final User u : users ) {
+					String username = replaceAll(	u.getUsername(),
+													this.lookup);
+					String password = replaceAll(	u.getPassword(),
+													this.lookup);
+					final UserEntity ue = new UserEntity(username, password, true, null);
+					withAccess[i] = ue;
+					i++;
+				}
+				driver.createDatabase(	name,
+										withAccess);
+				break;
+			case DROP:
+				break;
+			default:
+				throw new IllegalStateException("Can't handle " + action);
 		}
 	}
 

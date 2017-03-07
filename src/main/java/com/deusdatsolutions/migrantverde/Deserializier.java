@@ -25,7 +25,8 @@ import org.xml.sax.SAXException;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
 
 /**
- * Reads the configuration files. Enforces the XSD specified in the resources directory. Replaces variables in XML.
+ * Reads the configuration files. Enforces the XSD specified in the resources
+ * directory. Replaces variables in XML.
  * 
  * @author J Patrick Davenport
  *
@@ -47,43 +48,48 @@ public class Deserializier {
 
 			jaxbUnmarshaller.setSchema(migrationSchema);
 			jaxbUnmarshaller.setEventHandler(new DefaultValidationEventHandler());
-		} catch (final JAXBException | SAXException ex) {
+		} catch ( final JAXBException | SAXException ex ) {
 			throw new IllegalArgumentException("Can't create JAXB context", ex);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public MigrationType get(final Path xml) {
+	@SuppressWarnings( "unchecked" )
+	public MigrationType get( final Path xml ) {
 		try {
 			final InputStream xmlSrcStream = load(xml);
 			final JAXBElement<MigrationType> unmarshal = (JAXBElement<MigrationType>) this.jaxbUnmarshaller
 					.unmarshal(xmlSrcStream);
 			return unmarshal.getValue();
-		} catch (final Exception ex) {
+		} catch ( final Exception ex ) {
 			throw new MigrationException("Couldn't process path " + xml, ex);
 		}
 	}
 
-	private InputStream load(final Path xml) throws IOException {
-		final InputStream xmlSrcStream = Files.newInputStream(xml, StandardOpenOption.READ);
+	private InputStream load( final Path xml ) throws IOException {
+		final InputStream xmlSrcStream = Files.newInputStream(	xml,
+																StandardOpenOption.READ);
 		final String replaceProperties = replaceProperties(xmlSrcStream);
 		return new ByteArrayInputStream(replaceProperties.getBytes(StandardCharsets.UTF_8));
 	}
 
-	private String replaceProperties(final InputStream in) throws IOException {
+	private String replaceProperties( final InputStream in ) throws IOException {
 		String asString = migrationAsString(in);
-		for (final Entry<String, String> entry : variables.keyValues()) {
-			final String k = String.join("", "#", entry.getKey(), "#");
-			asString = asString.replace(k, entry.getValue());
+		for ( final Entry<String, String> entry : variables.keyValues() ) {
+			final String k = String.join(	"",
+											"#",
+											entry.getKey(),
+											"#");
+			asString = asString.replace(k,
+										entry.getValue());
 		}
 		return asString;
 	}
 
-	private String migrationAsString(final InputStream in) throws IOException {
-		try (BufferedReader buf = new BufferedReader(new InputStreamReader(in))) {
+	private String migrationAsString( final InputStream in ) throws IOException {
+		try (BufferedReader buf = new BufferedReader(new InputStreamReader(in)) ) {
 			final StringBuilder sb = new StringBuilder();
 			String line;
-			while ((line = buf.readLine()) != null) {
+			while ( (line = buf.readLine()) != null ) {
 				sb.append(line);
 			}
 			return sb.toString();

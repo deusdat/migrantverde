@@ -22,9 +22,9 @@ import com.deusdatsolutions.migrantverde.jaxb.IndexOperationType;
 public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 
 	@Override
-	public void migrate(final IndexOperationType migration, final ArangoDriver driver) throws ArangoException {
+	public void migrate( final IndexOperationType migration, final ArangoDriver driver ) throws ArangoException {
 		final ActionType action = migration.getAction();
-		switch (action) {
+		switch ( action ) {
 			case CREATE:
 				create(	migration,
 						driver);
@@ -38,23 +38,23 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 		}
 	}
 
-	private void drop(final IndexOperationType migration, final ArangoDriver driver) throws ArangoException {
+	private void drop( final IndexOperationType migration, final ArangoDriver driver ) throws ArangoException {
 		final String collName = migration.getName();
 		final IndexesEntity indexes = driver.getIndexes(collName);
-		for (final IndexEntity ie : indexes.getIndexes()) {
+		for ( final IndexEntity ie : indexes.getIndexes() ) {
 			final IndexEntityWrapper wrapper = new IndexEntityWrapper(ie);
-			if (migration.equals(wrapper)) {
+			if ( migration.equals(wrapper) ) {
 				driver.deleteIndex(ie.getId());
 				break;
 			}
 		}
 	}
 
-	private void create(final IndexOperationType migration, final ArangoDriver driver) throws ArangoException {
+	private void create( final IndexOperationType migration, final ArangoDriver driver ) throws ArangoException {
 		final IndexKindType type = migration.getType();
 		final String[] fields = migration.getField().toArray(new String[0]);
 		final String collection = migration.getName();
-		switch (type) {
+		switch ( type ) {
 			case FULLTEXT:
 				driver.createFulltextIndex(	collection,
 											migration.getMinLength().intValue(),
@@ -77,9 +77,9 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 		}
 	}
 
-	private IndexType to(final IndexKindType ikt) {
+	private IndexType to( final IndexKindType ikt ) {
 		IndexType result;
-		switch (ikt) {
+		switch ( ikt ) {
 			case PERSISTENT:
 				result = IndexType.PERSISTENT;
 				break;
@@ -106,7 +106,7 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 
 		public IndexEntityWrapper( final IndexEntity ie ) {
 			super();
-			if (ie == null) {
+			if ( ie == null ) {
 				throw new NullPointerException("IndexEntity can't be null");
 			}
 			this.ie = ie;
@@ -139,23 +139,24 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 
 		@Override
 		public IndexKindType getType() {
-			// TODO Replace with a switch, as bad-ass as this is. It's more bad, ass
+			// TODO Replace with a switch, as bad-ass as this is. It's more bad,
+			// ass
 			// FIXME NEVER!
 			final IndexKindType ikt = ie.getType() == IndexType.FULLTEXT ? IndexKindType.FULLTEXT
 					: ie.getType() == IndexType.PERSISTENT ? IndexKindType.PERSISTENT
 							: ie.getType() == IndexType.GEO ? IndexKindType.GEO
 									: ie.getType() == IndexType.HASH ? IndexKindType.HASH
 											: ie.getType() == IndexType.SKIPLIST ? IndexKindType.SKIPLIST : null;
-			if (ikt == null) {
+			if ( ikt == null ) {
 				throw new IllegalArgumentException("Could not convert: " + ie.getType());
 			}
 			return ikt;
 		}
 
 		@Override
-		public boolean equals(final Object obj) {
+		public boolean equals( final Object obj ) {
 			boolean result = false;
-			if (obj != null && (obj instanceof IndexEntityWrapper)) {
+			if ( obj != null && (obj instanceof IndexEntityWrapper) ) {
 				// This seems logically the best answer to the indexes being
 				// equal.
 				// Can we actually have full text index on the same field with

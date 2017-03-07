@@ -36,12 +36,13 @@
 		<complexContent>
 			<extension base="tns:NamedOperationType">
 				<sequence>
-					<element name="shardKey" type="string" minOccurs="0" maxOccurs="unbounded"></element>
+					<element name="shardKey" type="string" minOccurs="0"
+						maxOccurs="unbounded"></element>
 				</sequence>
 				<attribute name="journalSize" type="int"></attribute>
-				<attribute name="numberOfShards"	type="int" />
+				<attribute name="numberOfShards" type="int" />
 				<attribute name="waitForSync" type="boolean" />
-				<attribute name="allowUserKeys" type="boolean"/>
+				<attribute name="allowUserKeys" type="boolean" />
 				<attribute name="volatile" type="boolean" default="false" />
 				<attribute name="compactable" type="boolean" default="true" />
 			</extension>
@@ -86,7 +87,7 @@
 	</simpleType>
 
 	<complexType name="ArangoFunctionType">
-			<attribute name="class" type="string"></attribute>
+		<attribute name="class" type="string"></attribute>
 	</complexType>
 
 	<element name="migration" type="tns:MigrationType"></element>

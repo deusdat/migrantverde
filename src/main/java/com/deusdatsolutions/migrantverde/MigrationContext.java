@@ -20,8 +20,8 @@ public class MigrationContext {
 		return migration;
 	}
 
-	public MigrationContext(final String migrationVersion,
-							final MigrationType migration) {
+	public MigrationContext(	final String migrationVersion,
+								final MigrationType migration ) {
 		super();
 		this.migrationVersion = migrationVersion;
 		this.migration = migration;

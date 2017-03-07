@@ -43,16 +43,18 @@ import com.arangodb.entity.IndexesEntity;
  * @author J Patrick Davenport
  *
  */
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FixMethodOrder( MethodSorters.NAME_ASCENDING )
 public class MigratorIT {
 
 	private static final String TEST_DB = "IntegrationTestDB";
 
 	private static final ArangoDriver DRIVER;
-	private static String get(String key) {
+
+	private static String get( String key ) {
 		String value = System.getenv(key);
 		return value == null ? System.getProperty(key) : value;
 	}
+
 	static {
 		ArangoConfigure ac;
 		ac = new ArangoConfigure();
@@ -74,8 +76,8 @@ public class MigratorIT {
 	public static void cleanOutOld() throws ArangoException {
 		try {
 			DRIVER.deleteDatabase(TEST_DB);
-		} catch (final ArangoException e) {
-			if (e.getCode() != 404) { // 404 is DB not found.
+		} catch ( final ArangoException e ) {
+			if ( e.getCode() != 404 ) { // 404 is DB not found.
 				throw e;
 			}
 		}
@@ -83,7 +85,7 @@ public class MigratorIT {
 
 	@Test
 	public void a() throws ArangoException {
-		@SuppressWarnings("serial")
+		@SuppressWarnings( "serial" )
 		final Migrator m = new Migrator(DRIVER, Action.MIGRATION, new HashMap<String, String>() {
 			{
 				put("username",

@@ -28,7 +28,7 @@ public class Main {
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public static void main(final String[] args) throws FileNotFoundException, IOException {
+	public static void main( final String[] args ) throws FileNotFoundException, IOException {
 		final Properties props = weCool(args);
 
 		final ArangoConfigure ctx = new ArangoConfigure();
@@ -44,8 +44,8 @@ public class Main {
 		m.migrate(props.getProperty("root"));
 	}
 
-	private static Properties weCool(final String[] args) throws FileNotFoundException, IOException {
-		if (args.length != 1) {
+	private static Properties weCool( final String[] args ) throws FileNotFoundException, IOException {
+		if ( args.length != 1 ) {
 			System.out.println("Incorrect arguments passed:");
 			System.out.println("The only argument is a file with the following properties");
 			System.out.println("host=192.168.56.128");

@@ -93,7 +93,7 @@
 						<Prop1>timmy</Prop1>
 						<Prop8>Rights for human like robots</Prop8>
 					</systemProperties>
-			</configuration>
+				</configuration>
 				<dependencies>
 					<dependency>
 						<groupId>org.apache.maven.surefire</groupId>

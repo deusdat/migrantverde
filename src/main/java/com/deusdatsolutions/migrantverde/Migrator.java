@@ -64,67 +64,67 @@ public class Migrator {
 		this.startingAt = startingAt;
 	}
 
-	public int migrate(final String... migrationRoots) {
-		if (migrationRoots == null || migrationRoots.length == 0) {
+	public int migrate( final String... migrationRoots ) {
+		if ( migrationRoots == null || migrationRoots.length == 0 ) {
 			return 0;
 		} else {
 			int migrations = 0;
-			for (final String migration : migrationRoots) {
+			for ( final String migration : migrationRoots ) {
 				migrations += migrate(migration);
 			}
 			return migrations;
 		}
 	}
 
-	public int migrate(final String migrationRoot) {
+	public int migrate( final String migrationRoot ) {
 		final SortedSet<Path> migrations = finder.migrations(	migrationRoot,
 																this.action);
 		fullMigration = isFullMigration(migrations.first());
 		int executed = 0;
-		for (final Path p : migrations) {
+		for ( final Path p : migrations ) {
 			final MigrationType migration = deserializier.get(p);
 			final String migrationName = getMigrationName(p);
-			if (startingAt != null && migrationName.compareTo(startingAt) < 0) {
+			if ( startingAt != null && migrationName.compareTo(startingAt) < 0 ) {
 				continue;
 			}
 			try {
-				if (notApplied(migrationName)) {
+				if ( notApplied(migrationName) ) {
 					final MigrationContext migrationContext = new MigrationContext(migrationName, migration);
 					handler.migrate(migrationContext);
 					recordMigration(migrationContext);
 					executed++;
 				}
-			} catch (final ArangoException e) {
+			} catch ( final ArangoException e ) {
 				throw new MigrationException("Couldn't perform migration", e);
 			}
 		}
 		return executed;
 	}
 
-	private String getMigrationName(final Path p) {
+	private String getMigrationName( final Path p ) {
 		final Path fileName = p.getFileName();
-		if (fileName == null) {
+		if ( fileName == null ) {
 			throw new IllegalArgumentException("Path didn't have a file name " + p);
 		}
 		return fileName.toString().replace(	".xml",
 											"");
 	}
 
-	private boolean isFullMigration(final Path first) {
+	private boolean isFullMigration( final Path first ) {
 		final MigrationType migration = deserializier.get(first);
 		return action == Action.MIGRATION && migration.getUp().getDatabase() != null
 				&& dbDoesntExit(migration.getUp().getDatabase().getName());
 	}
 
-	private void initMigrationTracker(final MigrationContext migrationContext) throws ArangoException {
-		if (fullMigration) {
+	private void initMigrationTracker( final MigrationContext migrationContext ) throws ArangoException {
+		if ( fullMigration ) {
 			final String name = migrationContext.getMigration().getUp().getDatabase().getName();
 			driver.setDefaultDatabase(name);
 		}
 		try {
 			driver.getCollection(MIGRATION_COLLECTION);
-		} catch (final ArangoException e) {
-			if (e.getCode() == 404) {
+		} catch ( final ArangoException e ) {
+			if ( e.getCode() == 404 ) {
 				driver.createCollection(MIGRATION_COLLECTION);
 			}
 		}
@@ -132,18 +132,18 @@ public class Migrator {
 		fullMigration = false;
 	}
 
-	private boolean dbDoesntExit(final String name) {
+	private boolean dbDoesntExit( final String name ) {
 		boolean result = false;
 		try {
 			final StringsResultEntity databases = driver.getDatabases();
 			result = !databases.getResult().contains(name);
-		} catch (final ArangoException e) {
+		} catch ( final ArangoException e ) {
 
 		}
 		return result;
 	}
 
-	private void recordMigration(final MigrationContext migrationContext) throws ArangoException {
+	private void recordMigration( final MigrationContext migrationContext ) throws ArangoException {
 		initMigrationTracker(migrationContext);
 		final BaseDocument bd = new BaseDocument();
 		bd.addAttribute("name",
@@ -156,8 +156,8 @@ public class Migrator {
 								bd);
 	}
 
-	private boolean notApplied(final String migrationName) throws ArangoException {
-		if (fullMigration) {
+	private boolean notApplied( final String migrationName ) throws ArangoException {
+		if ( fullMigration ) {
 			return true;
 		}
 		final Map<String, Object> params = new HashMap<>();
@@ -175,7 +175,7 @@ public class Migrator {
 			final BaseDocument uniqueResult = result.getUniqueResult();
 			countSize = uniqueResult == null ? 0 : -1;
 		} finally {
-			if (result != null) {
+			if ( result != null ) {
 				result.close();
 			}
 		}

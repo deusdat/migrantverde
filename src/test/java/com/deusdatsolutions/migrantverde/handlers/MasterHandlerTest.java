@@ -27,9 +27,12 @@ public class MasterHandlerTest {
 	final Map<Class<?>, IMigrationHandler<?>> handlers = new HashMap<>();
 
 	{
-		handlers.put(CollectionOperationType.class, colHandler);
-		handlers.put(DatabaseOperationType.class, databaseHandler);
-		handlers.put(String.class, aqlHandler);
+		handlers.put(	CollectionOperationType.class,
+						colHandler);
+		handlers.put(	DatabaseOperationType.class,
+						databaseHandler);
+		handlers.put(	String.class,
+						aqlHandler);
 
 		forMigration = new MasterHandler(handlers, Action.MIGRATION, mockDriver);
 		forRollback = new MasterHandler(handlers, Action.ROLLBACK, mockDriver);
@@ -44,7 +47,10 @@ public class MasterHandlerTest {
 
 		forMigration.migrate(new MigrationContext("", mt));
 
-		Mockito.verify(colHandler, Mockito.times(1)).migrate(mt.getUp().getCollection(), mockDriver);
+		Mockito.verify(	colHandler,
+						Mockito.times(1))
+				.migrate(	mt.getUp().getCollection(),
+							mockDriver);
 	}
 
 	@Test
@@ -56,7 +62,10 @@ public class MasterHandlerTest {
 
 		forMigration.migrate(new MigrationContext("", mt));
 
-		Mockito.verify(databaseHandler, Mockito.times(1)).migrate(mt.getUp().getDatabase(), mockDriver);
+		Mockito.verify(	databaseHandler,
+						Mockito.times(1))
+				.migrate(	mt.getUp().getDatabase(),
+							mockDriver);
 	}
 
 	@Test
@@ -68,7 +77,10 @@ public class MasterHandlerTest {
 
 		forMigration.migrate(new MigrationContext("", mt));
 
-		Mockito.verify(aqlHandler, Mockito.times(1)).migrate(mt.getUp().getAql(), mockDriver);
+		Mockito.verify(	aqlHandler,
+						Mockito.times(1))
+				.migrate(	mt.getUp().getAql(),
+							mockDriver);
 	}
 
 	@Test
@@ -80,7 +92,10 @@ public class MasterHandlerTest {
 
 		forRollback.migrate(new MigrationContext("", mt));
 
-		Mockito.verify(colHandler, Mockito.times(1)).migrate(mt.getDown().getCollection(), mockDriver);
+		Mockito.verify(	colHandler,
+						Mockito.times(1))
+				.migrate(	mt.getDown().getCollection(),
+							mockDriver);
 	}
 
 	@Test
@@ -92,7 +107,10 @@ public class MasterHandlerTest {
 
 		forRollback.migrate(new MigrationContext("", mt));
 
-		Mockito.verify(databaseHandler, Mockito.times(1)).migrate(mt.getDown().getDatabase(), mockDriver);
+		Mockito.verify(	databaseHandler,
+						Mockito.times(1))
+				.migrate(	mt.getDown().getDatabase(),
+							mockDriver);
 	}
 
 	@Test
@@ -104,6 +122,9 @@ public class MasterHandlerTest {
 
 		forRollback.migrate(new MigrationContext("", mt));
 
-		Mockito.verify(aqlHandler, Mockito.times(1)).migrate(mt.getDown().getAql(), mockDriver);
+		Mockito.verify(	aqlHandler,
+						Mockito.times(1))
+				.migrate(	mt.getDown().getAql(),
+							mockDriver);
 	}
 }

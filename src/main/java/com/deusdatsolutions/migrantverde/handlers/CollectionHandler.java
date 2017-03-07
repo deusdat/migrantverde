@@ -14,31 +14,32 @@ import com.deusdatsolutions.migrantverde.jaxb.CollectionOperationType;
 public class CollectionHandler implements IMigrationHandler<CollectionOperationType> {
 
 	@Override
-	public void migrate(final CollectionOperationType migration, final ArangoDriver driver) throws ArangoException {
+	public void migrate( final CollectionOperationType migration, final ArangoDriver driver ) throws ArangoException {
 		final String name = migration.getName();
-		switch (migration.getAction()) {
-		case CREATE:
-			final CollectionOptions co = new CollectionOptions();
-			co.setDoCompact(migration.isCompactable());
-			co.setIsVolatile(migration.isVolatile());
-			if (migration.getJournalSize() != null) {
-				co.setJournalSize(migration.getJournalSize());
-			}
-			if (migration.getNumberOfShards() != null) {
-				co.setNumberOfShards(migration.getNumberOfShards());
-			}
-			co.setWaitForSync(migration.isWaitForSync());
+		switch ( migration.getAction() ) {
+			case CREATE:
+				final CollectionOptions co = new CollectionOptions();
+				co.setDoCompact(migration.isCompactable());
+				co.setIsVolatile(migration.isVolatile());
+				if ( migration.getJournalSize() != null ) {
+					co.setJournalSize(migration.getJournalSize());
+				}
+				if ( migration.getNumberOfShards() != null ) {
+					co.setNumberOfShards(migration.getNumberOfShards());
+				}
+				co.setWaitForSync(migration.isWaitForSync());
 
-			if (!migration.getShardKey().isEmpty()) {
-				co.setShardKeys(migration.getShardKey());
-			}
-			driver.createCollection(name, co);
-			break;
-		case DROP:
-			driver.deleteCollection(name);
-			break;
-		default:
-			throw new IllegalArgumentException("Can't hand migration " + migration.getAction());
+				if ( !migration.getShardKey().isEmpty() ) {
+					co.setShardKeys(migration.getShardKey());
+				}
+				driver.createCollection(name,
+										co);
+				break;
+			case DROP:
+				driver.deleteCollection(name);
+				break;
+			default:
+				throw new IllegalArgumentException("Can't hand migration " + migration.getAction());
 		}
 	}
 

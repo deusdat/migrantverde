@@ -10,5 +10,5 @@ import com.arangodb.ArangoException;
  *
  */
 public interface ArangoDbFunction {
-	void apply(final ArangoDriver driver) throws ArangoException;
+	void apply( final ArangoDriver driver ) throws ArangoException;
 }

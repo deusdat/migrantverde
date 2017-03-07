@@ -12,7 +12,8 @@ import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType.Up;
 
 /**
- * Tests the process of loading a migration and the process of replacing variables.
+ * Tests the process of loading a migration and the process of replacing
+ * variables.
  * 
  * Needs two environment varaibles
  * <ul>
@@ -25,7 +26,7 @@ import com.deusdatsolutions.migrantverde.jaxb.MigrationType.Up;
  */
 public class DeserializerTest {
 
-	@Test(expected = MigrationException.class)
+	@Test( expected = MigrationException.class )
 	public void emptyPath() {
 		final Deserializier d = new Deserializier();
 		d.get(null);
@@ -36,7 +37,8 @@ public class DeserializerTest {
 		final Deserializier d = new Deserializier();
 
 		final URL resource = getClass().getClassLoader().getResource("one/20160625123905.xml");
-		assertNotNull("Should have found the resource locally", resource);
+		assertNotNull(	"Should have found the resource locally",
+						resource);
 
 		final MigrationType migrationType = d.get(Paths.get(resource.toURI()));
 		assertNotNull(migrationType);
@@ -44,9 +46,12 @@ public class DeserializerTest {
 		final Up up = migrationType.getUp();
 		assertNull(up.getCollection());
 		assertNull(up.getDatabase());
-		assertEquals("Should be a simple FOR after trimming", "FOR", up.getAql().trim());
+		assertEquals(	"Should be a simple FOR after trimming",
+						"FOR",
+						up.getAql().trim());
 
-		assertNull("Should not not have a down grade", migrationType.getDown());
+		assertNull(	"Should not not have a down grade",
+					migrationType.getDown());
 	}
 
 	@Test
@@ -54,15 +59,19 @@ public class DeserializerTest {
 		final Deserializier d = new Deserializier();
 
 		final URL resource = getClass().getClassLoader().getResource("replacement/20160625123905.xml");
-		assertNotNull("Should have found the resource locally", resource);
+		assertNotNull(	"Should have found the resource locally",
+						resource);
 
 		final MigrationType migrationType = d.get(Paths.get(resource.toURI()));
 
 		final Up up = migrationType.getUp();
 		assertNull(up.getCollection());
 		assertNull(up.getDatabase());
-		assertEquals("Should be a simple 'FOR Two IN else' after trimming", "FOR Two in else", up.getAql().trim());
+		assertEquals(	"Should be a simple 'FOR Two IN else' after trimming",
+						"FOR Two in else",
+						up.getAql().trim());
 
-		assertNull("Should not not have a down grade", migrationType.getDown());
+		assertNull(	"Should not not have a down grade",
+					migrationType.getDown());
 	}
 }

@@ -30,7 +30,7 @@ public class MasterHandler {
 	private final Action action;
 	private final ArangoDriver driver;
 
-	private static Map<Class<?>, IMigrationHandler<?>> createHandlers(Map<String, String> lookup) {
+	private static Map<Class<?>, IMigrationHandler<?>> createHandlers( Map<String, String> lookup ) {
 		final Map<Class<?>, IMigrationHandler<?>> HANDLERS = new HashMap<>();
 		HANDLERS.put(	CollectionOperationType.class,
 						new CollectionHandler());
@@ -71,13 +71,13 @@ public class MasterHandler {
 		this.driver = driver;
 	}
 
-	@SuppressWarnings("unchecked")
-	public void migrate(final MigrationContext migrationContext) {
-		@SuppressWarnings("rawtypes")
+	@SuppressWarnings( "unchecked" )
+	public void migrate( final MigrationContext migrationContext ) {
+		@SuppressWarnings( "rawtypes" )
 		IMigrationHandler handler = null;
 		Object migrationConfig;
 		final MigrationType migration = migrationContext.getMigration();
-		if (action == Action.MIGRATION) {
+		if ( action == Action.MIGRATION ) {
 			migrationConfig = input(migration.getUp());
 		} else {
 			migrationConfig = input(migration.getDown());
@@ -87,16 +87,16 @@ public class MasterHandler {
 		try {
 			handler.migrate(migrationConfig,
 							driver);
-		} catch (final ArangoException e) {
+		} catch ( final ArangoException e ) {
 			throw new MigrationException("Could migrate: " + migrationConfig, e);
 		}
 	}
 
-	private Object input(final Down down) {
+	private Object input( final Down down ) {
 		return find(down);
 	}
 
-	private Object input(final Up up) {
+	private Object input( final Up up ) {
 		return find(up);
 	}
 
@@ -110,17 +110,17 @@ public class MasterHandler {
 	 * @throws IllegalArgumentException
 	 *             if anything goes bad invoking the getter.
 	 */
-	private Object find(final Object in) {
+	private Object find( final Object in ) {
 		final Method[] methods = in.getClass().getDeclaredMethods();
 		Object r = null;
-		for (final Method m : methods) {
-			if (m.getName().startsWith("get") && m.getParameterCount() == 0) {
+		for ( final Method m : methods ) {
+			if ( m.getName().startsWith("get") && m.getParameterCount() == 0 ) {
 				try {
 					r = m.invoke(in);
-				} catch (final Exception ex) {
+				} catch ( final Exception ex ) {
 					throw new IllegalArgumentException("Couldn't process up/down configuration", ex);
 				}
-				if (r != null) {
+				if ( r != null ) {
 					break;
 				}
 			}

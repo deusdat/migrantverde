@@ -8,8 +8,9 @@ package com.deusdatsolutions.migrantverde;
  */
 public enum Action {
 	/**
-	 * An creative process for the database. It can be inserting records, manipulating attributes or document
-	 * structures, or even deleting collections.
+	 * An creative process for the database. It can be inserting records,
+	 * manipulating attributes or document structures, or even deleting
+	 * collections.
 	 */
 	MIGRATION,
 	/**
