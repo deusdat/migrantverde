@@ -149,3 +149,6 @@ The library is not yet in a central Maven repository. You can download the lates
 Most of the tests are honest unit tests. There are few integration tests. These need a running instance of Arango.
 To get them to work you need to specify three **environment** variables: arangoHost, migrationPassword, migrationUser.
 Since this is a full migration, you need provide a root account. 
+
+## Supported ArangoDB Version
+Presently supports v3 via the HTTP API. The prior release, 0.0.1, supports v2. The next version will support the new binary protocol.
