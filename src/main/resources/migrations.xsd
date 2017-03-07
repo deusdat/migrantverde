@@ -16,7 +16,7 @@
 
 	<simpleType name="IndexKindType">
 		<restriction base="string">
-			<enumeration value="cap" />
+			<enumeration value="persistent" />
 			<enumeration value="geo" />
 			<enumeration value="hash" />
 			<enumeration value="fulltext" />

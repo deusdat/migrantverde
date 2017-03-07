@@ -25,14 +25,16 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 	public void migrate(final IndexOperationType migration, final ArangoDriver driver) throws ArangoException {
 		final ActionType action = migration.getAction();
 		switch (action) {
-		case CREATE:
-			create(migration, driver);
-			break;
-		case DROP:
-			drop(migration, driver);
-			break;
-		default:
-			throw new IllegalArgumentException("Unable to apply " + action + " to an index");
+			case CREATE:
+				create(	migration,
+						driver);
+				break;
+			case DROP:
+				drop(	migration,
+						driver);
+				break;
+			default:
+				throw new IllegalArgumentException("Unable to apply " + action + " to an index");
 		}
 	}
 
@@ -53,24 +55,24 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 		final String[] fields = migration.getField().toArray(new String[0]);
 		final String collection = migration.getName();
 		switch (type) {
-		case CAP:
-			driver.createCappedByDocumentSizeIndex(collection, migration.getSize().intValue());
-			break;
-		case FULLTEXT:
-			driver.createFulltextIndex(collection, migration.getMinLength().intValue(), fields);
-			break;
-		case GEO:
-		case HASH:
-		case SKIPLIST:
-			final IndexType indexType = to(type);
-			driver.createIndex(collection,
-					indexType,
-					migration.isUnique(),
-					migration.isSparse(),
-					fields);
-			break;
-		default:
-			break;
+			case FULLTEXT:
+				driver.createFulltextIndex(	collection,
+											migration.getMinLength().intValue(),
+											fields);
+				break;
+			case PERSISTENT:
+			case GEO:
+			case HASH:
+			case SKIPLIST:
+				final IndexType indexType = to(type);
+				driver.createIndex(	collection,
+									indexType,
+									migration.isUnique(),
+									migration.isSparse(),
+									fields);
+				break;
+			default:
+				break;
 
 		}
 	}
@@ -78,23 +80,23 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 	private IndexType to(final IndexKindType ikt) {
 		IndexType result;
 		switch (ikt) {
-		case CAP:
-			result = IndexType.CAP;
-			break;
-		case FULLTEXT:
-			result = IndexType.FULLTEXT;
-			break;
-		case GEO:
-			result = IndexType.GEO;
-			break;
-		case HASH:
-			result = IndexType.HASH;
-			break;
-		case SKIPLIST:
-			result = IndexType.SKIPLIST;
-			break;
-		default:
-			throw new IllegalArgumentException("Can't convert " + ikt);
+			case PERSISTENT:
+				result = IndexType.PERSISTENT;
+				break;
+			case FULLTEXT:
+				result = IndexType.FULLTEXT;
+				break;
+			case GEO:
+				result = IndexType.GEO;
+				break;
+			case HASH:
+				result = IndexType.HASH;
+				break;
+			case SKIPLIST:
+				result = IndexType.SKIPLIST;
+				break;
+			default:
+				throw new IllegalArgumentException("Can't convert " + ikt);
 		}
 		return result;
 	}
@@ -102,7 +104,7 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 	private static final class IndexEntityWrapper extends IndexOperationType {
 		private final IndexEntity ie;
 
-		public IndexEntityWrapper(final IndexEntity ie) {
+		public IndexEntityWrapper( final IndexEntity ie ) {
 			super();
 			if (ie == null) {
 				throw new NullPointerException("IndexEntity can't be null");
@@ -137,9 +139,10 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 
 		@Override
 		public IndexKindType getType() {
-			// TODO Replace with a switch, as bad-ass as this is. It's more bad, ass.
-			final IndexKindType ikt = ie.getType() == IndexType.CAP ? IndexKindType.CAP
-					: ie.getType() == IndexType.FULLTEXT ? IndexKindType.FULLTEXT
+			// TODO Replace with a switch, as bad-ass as this is. It's more bad, ass
+			// FIXME NEVER!
+			final IndexKindType ikt = ie.getType() == IndexType.FULLTEXT ? IndexKindType.FULLTEXT
+					: ie.getType() == IndexType.PERSISTENT ? IndexKindType.PERSISTENT
 							: ie.getType() == IndexType.GEO ? IndexKindType.GEO
 									: ie.getType() == IndexType.HASH ? IndexKindType.HASH
 											: ie.getType() == IndexType.SKIPLIST ? IndexKindType.SKIPLIST : null;
@@ -153,8 +156,10 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 		public boolean equals(final Object obj) {
 			boolean result = false;
 			if (obj != null && (obj instanceof IndexEntityWrapper)) {
-				// This seems logically the best answer to the indexes being equal.
-				// Can we actually have full text index on the same field with two different minLengths?
+				// This seems logically the best answer to the indexes being
+				// equal.
+				// Can we actually have full text index on the same field with
+				// two different minLengths?
 				// Can we have to cap indexes? I'd have to say.
 				final IndexEntityWrapper in = (IndexEntityWrapper) obj;
 				result = this.getType() == in.getType() & this.getField().equals(in.getField());
