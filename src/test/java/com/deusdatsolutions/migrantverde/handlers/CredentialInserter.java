@@ -15,15 +15,14 @@
  */
 package com.deusdatsolutions.migrantverde.handlers;
 
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
 import com.arangodb.entity.BaseDocument;
 import com.deusdatsolutions.migrantverde.ArangoDbFunction;
+import com.deusdatsolutions.migrantverde.DBContext;
 
 public class CredentialInserter implements ArangoDbFunction {
 
 	@Override
-	public void apply( final ArangoDriver driver ) throws ArangoException {
+	public void apply( final DBContext driver ) {
 		/*
 		 * While this example is simple, think of how you can use this in
 		 * production. For example, you need insert some system accounts, but
@@ -37,8 +36,7 @@ public class CredentialInserter implements ArangoDbFunction {
 							"ringo");
 		value.addAttribute(	"password",
 							"starr");
-		driver.createDocument(	"Users",
-								value);
+		driver.db.collection("Users").insertDocument(value);
 	}
 
 }

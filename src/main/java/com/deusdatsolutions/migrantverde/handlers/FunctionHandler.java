@@ -15,9 +15,8 @@
  */
 package com.deusdatsolutions.migrantverde.handlers;
 
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
 import com.deusdatsolutions.migrantverde.ArangoDbFunction;
+import com.deusdatsolutions.migrantverde.DBContext;
 import com.deusdatsolutions.migrantverde.jaxb.ArangoFunctionType;
 
 /**
@@ -30,12 +29,12 @@ import com.deusdatsolutions.migrantverde.jaxb.ArangoFunctionType;
 public class FunctionHandler implements IMigrationHandler<ArangoFunctionType> {
 
 	@Override
-	public void migrate( final ArangoFunctionType migration, final ArangoDriver driver ) throws ArangoException {
+	public void migrate( final ArangoFunctionType migration, final DBContext ctx ) {
 		final String clazz = migration.getClazz();
 		try {
 			final Class<?> loadClass = getClass().getClassLoader().loadClass(clazz);
 			final ArangoDbFunction newInstance = (ArangoDbFunction) loadClass.newInstance();
-			newInstance.apply(driver);
+			newInstance.apply(ctx);
 		} catch ( final ClassNotFoundException | InstantiationException | IllegalAccessException e ) {
 			throw new IllegalArgumentException("Can't find " + clazz, e);
 		}

@@ -15,17 +15,18 @@
  */
 package com.deusdatsolutions.migrantverde;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
-import com.arangodb.CursorResult;
+import com.arangodb.ArangoCursor;
+import com.arangodb.ArangoDBException;
+import com.arangodb.ArangoDatabase;
 import com.arangodb.entity.BaseDocument;
-import com.arangodb.entity.StringsResultEntity;
+import com.arangodb.entity.DatabaseEntity;
 import com.deusdatsolutions.migrantverde.handlers.MasterHandler;
 import com.deusdatsolutions.migrantverde.jaxb.MigrationType;
 
@@ -44,38 +45,38 @@ public class Migrator {
 	private final MigrationsFinder finder;
 	private final Deserializier deserializier;
 	private final MasterHandler handler;
-	private final ArangoDriver driver;
+	private final DBContext dbContext;
 	private final Action action;
 	private boolean fullMigration;
 	private final String startingAt;
 
-	public Migrator(	final ArangoDriver driver,
+	public Migrator(	final DBContext dbContext,
 						final Action action ) {
-		this(driver, action, null, new HashMap<String, String>());
+		this(dbContext, action, null, new HashMap<String, String>());
 	}
 
-	public Migrator(	final ArangoDriver driver,
+	public Migrator(	final DBContext dbContext,
 						final Action action,
 						final Map<String, String> lookup ) {
-		this(driver, action, null, lookup);
+		this(dbContext, action, null, lookup);
 	}
 
-	public Migrator(	final ArangoDriver driver,
+	public Migrator(	final DBContext dbContext,
 						final Action action,
 						final String startingAt ) {
-		this(driver, action, startingAt, new HashMap<String, String>());
+		this(dbContext, action, startingAt, new HashMap<String, String>());
 	}
 
-	public Migrator(	final ArangoDriver driver,
+	public Migrator(	final DBContext dbContext,
 						final Action action,
 						final String startingAt,
 						Map<String, String> lookup ) {
 		super();
 		this.action = action;
-		this.driver = driver;
+		this.dbContext = dbContext;
 		this.finder = new MigrationsFinder();
 		this.deserializier = new Deserializier();
-		this.handler = new MasterHandler(action, driver, lookup);
+		this.handler = new MasterHandler(action, dbContext, lookup);
 		this.startingAt = startingAt;
 	}
 
@@ -102,15 +103,11 @@ public class Migrator {
 			if ( startingAt != null && migrationName.compareTo(startingAt) < 0 ) {
 				continue;
 			}
-			try {
-				if ( notApplied(migrationName) ) {
-					final MigrationContext migrationContext = new MigrationContext(migrationName, migration);
-					handler.migrate(migrationContext);
-					recordMigration(migrationContext);
-					executed++;
-				}
-			} catch ( final ArangoException e ) {
-				throw new MigrationException("Couldn't perform migration", e);
+			if ( notApplied(migrationName) ) {
+				final MigrationContext migrationContext = new MigrationContext(migrationName, migration);
+				handler.migrate(migrationContext);
+				recordMigration(migrationContext);
+				executed++;
 			}
 		}
 		return executed;
@@ -131,34 +128,27 @@ public class Migrator {
 				&& dbDoesntExit(migration.getUp().getDatabase().getName());
 	}
 
-	private void initMigrationTracker( final MigrationContext migrationContext ) throws ArangoException {
+	private void initMigrationTracker( final MigrationContext migrationContext ) {
 		if ( fullMigration ) {
 			final String name = migrationContext.getMigration().getUp().getDatabase().getName();
-			driver.setDefaultDatabase(name);
-		}
-		try {
-			driver.getCollection(MIGRATION_COLLECTION);
-		} catch ( final ArangoException e ) {
-			if ( e.getCode() == 404 ) {
-				driver.createCollection(MIGRATION_COLLECTION);
-			}
+			dbContext.update(name);
+			this.dbContext.db.createCollection(MIGRATION_COLLECTION);
 		}
 
 		fullMigration = false;
 	}
 
 	private boolean dbDoesntExit( final String name ) {
-		boolean result = false;
+		ArangoDatabase db = this.dbContext.driver.db(name);
 		try {
-			final StringsResultEntity databases = driver.getDatabases();
-			result = !databases.getResult().contains(name);
-		} catch ( final ArangoException e ) {
-
+			db.getInfo();
+			return false;
+		} catch ( ArangoDBException e ) {
+			return true;
 		}
-		return result;
 	}
 
-	private void recordMigration( final MigrationContext migrationContext ) throws ArangoException {
+	private void recordMigration( final MigrationContext migrationContext ) {
 		initMigrationTracker(migrationContext);
 		final BaseDocument bd = new BaseDocument();
 		bd.addAttribute("name",
@@ -167,11 +157,10 @@ public class Migrator {
 						action);
 		bd.addAttribute("applied",
 						new Date());
-		driver.createDocument(	MIGRATION_COLLECTION,
-								bd);
+		dbContext.db.collection(MIGRATION_COLLECTION).insertDocument(bd);
 	}
 
-	private boolean notApplied( final String migrationName ) throws ArangoException {
+	private boolean notApplied( final String migrationName ) {
 		if ( fullMigration ) {
 			return true;
 		}
@@ -180,19 +169,19 @@ public class Migrator {
 					action);
 		params.put(	"name",
 					migrationName);
-		CursorResult<BaseDocument> result = null;
 		int countSize = -1;
-		try {
-			result = driver.executeAqlQuery(MIGRATION_APPLIED_QUERY,
-											params,
-											null,
-											BaseDocument.class);
-			final BaseDocument uniqueResult = result.getUniqueResult();
-			countSize = uniqueResult == null ? 0 : -1;
-		} finally {
-			if ( result != null ) {
-				result.close();
-			}
+		try (ArangoCursor<BaseDocument> cursor = dbContext.db.query(MIGRATION_APPLIED_QUERY,
+																	params,
+																	null,
+																	BaseDocument.class) ) {
+			
+			
+			countSize = cursor.hasNext() ? -1 : 0;
+		} catch ( IOException e ) {
+			throw new IllegalArgumentException("Couldn't find migration status for " + migrationName, e);
+		} catch (NullPointerException npe) {
+			System.err.println("Probably ok. Bug in ArangoDB driver for auto closed cursors.");
+			npe.printStackTrace();
 		}
 
 		return countSize == 0;

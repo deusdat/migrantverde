@@ -15,8 +15,7 @@
  */
 package com.deusdatsolutions.migrantverde.handlers;
 
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
+import com.deusdatsolutions.migrantverde.DBContext;
 
 /**
  * A command pattern for reacting to various migration configurations.
@@ -30,12 +29,10 @@ public interface IMigrationHandler<T> {
 	 * A standard way that the migrations will be applied.
 	 * 
 	 * @param migration
-	 * @param driver
-	 * @throws ArangoException
-	 *             if Arango doesn't like something.
+	 * @param dbContext
 	 * @throws IllegalArgumentException
 	 *             if the code validation doesn't like something from the
 	 *             migration.
 	 */
-	void migrate( final T migration, ArangoDriver driver ) throws ArangoException;
+	void migrate( final T migration, DBContext dbContext );
 }

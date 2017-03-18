@@ -16,14 +16,19 @@
 package com.deusdatsolutions.migrantverde.handlers;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
 import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.IndexType;
-import com.arangodb.entity.IndexesEntity;
+import com.arangodb.model.FulltextIndexOptions;
+import com.arangodb.model.GeoIndexOptions;
+import com.arangodb.model.HashIndexOptions;
+import com.arangodb.model.PersistentIndexOptions;
+import com.arangodb.model.SkiplistIndexOptions;
+import com.deusdatsolutions.migrantverde.DBContext;
 import com.deusdatsolutions.migrantverde.jaxb.ActionType;
 import com.deusdatsolutions.migrantverde.jaxb.IndexKindType;
 import com.deusdatsolutions.migrantverde.jaxb.IndexOperationType;
@@ -37,7 +42,7 @@ import com.deusdatsolutions.migrantverde.jaxb.IndexOperationType;
 public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 
 	@Override
-	public void migrate( final IndexOperationType migration, final ArangoDriver driver ) throws ArangoException {
+	public void migrate( final IndexOperationType migration, final DBContext driver ) {
 		final ActionType action = migration.getAction();
 		switch ( action ) {
 			case CREATE:
@@ -53,67 +58,58 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 		}
 	}
 
-	private void drop( final IndexOperationType migration, final ArangoDriver driver ) throws ArangoException {
+	private void drop( final IndexOperationType migration, final DBContext ctx ) {
 		final String collName = migration.getName();
-		final IndexesEntity indexes = driver.getIndexes(collName);
-		for ( final IndexEntity ie : indexes.getIndexes() ) {
+		Collection<IndexEntity> indexes = ctx.db.collection(collName).getIndexes();
+		for ( final IndexEntity ie : indexes ) {
 			final IndexEntityWrapper wrapper = new IndexEntityWrapper(ie);
 			if ( migration.equals(wrapper) ) {
-				driver.deleteIndex(ie.getId());
+				ctx.db.deleteIndex(wrapper.getName());
 				break;
 			}
 		}
 	}
 
-	private void create( final IndexOperationType migration, final ArangoDriver driver ) throws ArangoException {
+	private void create( final IndexOperationType migration, final DBContext ctx ) {
 		final IndexKindType type = migration.getType();
+
 		final String[] fields = migration.getField().toArray(new String[0]);
 		final String collection = migration.getName();
+
 		switch ( type ) {
 			case FULLTEXT:
-				driver.createFulltextIndex(	collection,
-											migration.getMinLength().intValue(),
-											fields);
+				FulltextIndexOptions options = new FulltextIndexOptions();
+				options.minLength(migration.getMinLength().intValue());
+				ctx.db.collection(collection).createFulltextIndex(	Arrays.asList(fields),
+																	options);
 				break;
 			case PERSISTENT:
+				ctx.db.collection(collection).createPersistentIndex(Arrays.asList(fields),
+																	new PersistentIndexOptions()
+																			.sparse(migration.isSparse())
+																			.unique(migration.isUnique()));
+				break;
 			case GEO:
+				ctx.db.collection(collection).createGeoIndex(	Arrays.asList(fields),
+																new GeoIndexOptions()
+																		.geoJson(migration.isGeoJson()));
+				break;
 			case HASH:
+				ctx.db.collection(collection).createHashIndex(	Arrays.asList(fields),
+																new HashIndexOptions()
+																		.sparse(migration.isSparse())
+																		.unique(migration.isUnique()));
+				break;
 			case SKIPLIST:
-				final IndexType indexType = to(type);
-				driver.createIndex(	collection,
-									indexType,
-									migration.isUnique(),
-									migration.isSparse(),
-									fields);
+				ctx.db.collection(collection).createSkiplistIndex(	Arrays.asList(fields),
+																	new SkiplistIndexOptions()
+																			.sparse(migration.isSparse())
+																			.unique(migration.isUnique()));
 				break;
 			default:
 				break;
 
 		}
-	}
-
-	private IndexType to( final IndexKindType ikt ) {
-		IndexType result;
-		switch ( ikt ) {
-			case PERSISTENT:
-				result = IndexType.PERSISTENT;
-				break;
-			case FULLTEXT:
-				result = IndexType.FULLTEXT;
-				break;
-			case GEO:
-				result = IndexType.GEO;
-				break;
-			case HASH:
-				result = IndexType.HASH;
-				break;
-			case SKIPLIST:
-				result = IndexType.SKIPLIST;
-				break;
-			default:
-				throw new IllegalArgumentException("Can't convert " + ikt);
-		}
-		return result;
 	}
 
 	private static final class IndexEntityWrapper extends IndexOperationType {
@@ -129,17 +125,17 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 
 		@Override
 		public List<String> getField() {
-			return ie.getFields() == null ? new LinkedList<String>() : ie.getFields();
+			return ie.getFields() == null ? new LinkedList<String>() : new LinkedList<>(ie.getFields());
 		}
 
 		@Override
 		public boolean isUnique() {
-			return ie.isUnique();
+			return ie.getUnique();
 		}
 
 		@Override
 		public boolean isSparse() {
-			return ie.isSparse();
+			return ie.getSparse();
 		}
 
 		@Override
@@ -148,20 +144,14 @@ public class IndexHandler implements IMigrationHandler<IndexOperationType> {
 		}
 
 		@Override
-		public BigInteger getSize() {
-			return BigInteger.valueOf(ie.getSize());
-		}
-
-		@Override
 		public IndexKindType getType() {
-			// TODO Replace with a switch, as bad-ass as this is. It's more bad,
-			// ass
+			// TODO Replace with a switch, as bad-ass as this is. It's more bad, ass.
 			// FIXME NEVER!
-			final IndexKindType ikt = ie.getType() == IndexType.FULLTEXT ? IndexKindType.FULLTEXT
-					: ie.getType() == IndexType.PERSISTENT ? IndexKindType.PERSISTENT
-							: ie.getType() == IndexType.GEO ? IndexKindType.GEO
-									: ie.getType() == IndexType.HASH ? IndexKindType.HASH
-											: ie.getType() == IndexType.SKIPLIST ? IndexKindType.SKIPLIST : null;
+			final IndexKindType ikt = ie.getType() == IndexType.fulltext ? IndexKindType.FULLTEXT
+					: ie.getType() == IndexType.persistent ? IndexKindType.PERSISTENT
+							: ie.getType() == IndexType.geo ? IndexKindType.GEO
+									: ie.getType() == IndexType.hash ? IndexKindType.HASH
+											: ie.getType() == IndexType.skiplist ? IndexKindType.SKIPLIST : null;
 			if ( ikt == null ) {
 				throw new IllegalArgumentException("Could not convert: " + ie.getType());
 			}

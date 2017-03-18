@@ -15,12 +15,11 @@
  */
 package com.deusdatsolutions.migrantverde.handlers;
 
+import static com.deusdatsolutions.migrantverde.handlers.Replacer.replaceAll;
+
 import java.util.Map;
 
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
-
-import static com.deusdatsolutions.migrantverde.handlers.Replacer.*;
+import com.deusdatsolutions.migrantverde.DBContext;
 
 /**
  * Supports converting an AQL configuration into a realized executiong.
@@ -36,8 +35,8 @@ public class AqlHandler implements IMigrationHandler<String> {
 	}
 
 	@Override
-	public void migrate( final String migration, final ArangoDriver driver ) throws ArangoException {
-		driver.executeAqlQuery(	replaceAll(	migration,
+	public void migrate( final String migration, final DBContext ctx ){
+		ctx.db.query(	replaceAll(	migration,
 											lookup),
 								null,
 								null,

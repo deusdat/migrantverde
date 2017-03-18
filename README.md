@@ -128,14 +128,20 @@ You'll still need a JVM 1.7+ installed.
 java -cp "/path/to/Arango/Driver.jar" com.deusdatsolutions.migrantverde.Main /path/to/config/file.properties.
 
 The configuration file needs the following key-value pairs.
+                                                                    
+|	property-key				|	description								|	default value	|
+|-------------------------------|-------------------------------------------|-------------------|
+|	arangodb.hosts				|	ArangoDB hosts 							|	127.0.0.1:8529	|
+|	arangodb.timeout			|	socket connect timeout(millisecond)		|	0				|
+|	arangodb.user				|	Basic Authentication User				|					|
+|	arangodb.password			|	Basic Authentication Password			|					|
+|	arangodb.useSsl				|	use SSL connection						|	false			|
+|	arangodb.chunksize			|	VelocyStream Chunk content-size(bytes)	|	30000			|
+|	arangodb.connections.max	|	max number of connections				|	1				|
+|	migrantverde.db				|	The name of the migrating DB			|					|
+|	migrantverde.action			|	Migration or Rollback.					|					|
+|	migrantverde.root			|	The path to the migration directory		|					|
 
-* host=name/IP
-* port=8529
-* username=root
-* password=somepassword
-* db=db_name. If you run a full migration, the system detects the database and sets that as default. If your picking up where you left off, you need to specify the database. It's best to always define the default db.
-* action=migration|rollback
-* root=/path/to/migration/dir
 
 When running a full migration, you need to provide credentials that can create a database. From our use root is a good
 option. 

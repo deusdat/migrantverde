@@ -15,17 +15,17 @@
  */
 package com.deusdatsolutions.migrantverde.handlers;
 
+import static com.deusdatsolutions.migrantverde.handlers.Replacer.replaceAll;
+
 import java.util.List;
 import java.util.Map;
 
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
-import com.arangodb.entity.UserEntity;
+import com.arangodb.ArangoDBException;
+import com.arangodb.model.UserCreateOptions;
+import com.deusdatsolutions.migrantverde.DBContext;
 import com.deusdatsolutions.migrantverde.jaxb.ActionType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType.User;
-
-import static com.deusdatsolutions.migrantverde.handlers.Replacer.replaceAll;
 
 /**
  * Reactor to the database tag.
@@ -42,25 +42,35 @@ public class DatabaseHandler implements IMigrationHandler<DatabaseOperationType>
 	}
 
 	@Override
-	public void migrate( final DatabaseOperationType migration, final ArangoDriver driver ) throws ArangoException {
+	public void migrate( final DatabaseOperationType migration, final DBContext ctx ) {
 		final ActionType action = migration.getAction();
 		final String name = migration.getName();
 		switch ( action ) {
 			case CREATE:
 				final List<User> users = migration.getUser();
-				final UserEntity[] withAccess = new UserEntity[users.size()];
-				int i = 0;
+				ctx.driver.createDatabase(name);
+				ctx.db = ctx.driver.db(name);
+				
 				for ( final User u : users ) {
 					String username = replaceAll(	u.getUsername(),
 													this.lookup);
 					String password = replaceAll(	u.getPassword(),
 													this.lookup);
-					final UserEntity ue = new UserEntity(username, password, true, null);
-					withAccess[i] = ue;
-					i++;
+					UserCreateOptions options = new UserCreateOptions();
+					options.active(true);
+					
+					try {
+						ctx.driver.createUser(username, password, options);
+					} catch ( ArangoDBException e ) {
+						if(e.getResponseCode() == 409) {
+							System.err.println("User " + username + " already exists");
+						} else {
+							e.printStackTrace();
+						}
+					}
+
+					ctx.db.grantAccess(username);
 				}
-				driver.createDatabase(	name,
-										withAccess);
 				break;
 			case DROP:
 				break;

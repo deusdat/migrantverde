@@ -15,7 +15,8 @@
  */
 package com.deusdatsolutions.migrantverde;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,16 +33,12 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import com.arangodb.ArangoConfigure;
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
-import com.arangodb.ArangoHost;
+import com.arangodb.ArangoCollection;
+import com.arangodb.ArangoDB;
+import com.arangodb.ArangoDBException;
 import com.arangodb.entity.BaseDocument;
-import com.arangodb.entity.CollectionEntity;
-import com.arangodb.entity.DocumentEntity;
 import com.arangodb.entity.IndexEntity;
 import com.arangodb.entity.IndexType;
-import com.arangodb.entity.IndexesEntity;
 
 /**
  * This is an integration test to make sure that the system can run a full
@@ -60,24 +57,13 @@ import com.arangodb.entity.IndexesEntity;
  */
 @FixMethodOrder( MethodSorters.NAME_ASCENDING )
 public class MigratorIT {
-
 	private static final String TEST_DB = "IntegrationTestDB";
-
-	private static final ArangoDriver DRIVER;
-
-	private static String get( String key ) {
-		String value = System.getenv(key);
-		return value == null ? System.getProperty(key) : value;
-	}
+	private static final DBContext CTX;
 
 	static {
-		ArangoConfigure ac;
-		ac = new ArangoConfigure();
-		ac.setUser(get("migrationUser"));
-		ac.setPassword(get("migrationPassword"));
-		ac.setArangoHost(new ArangoHost(get("arangoHost"), 8529));
-		ac.init();
-		DRIVER = new ArangoDriver(ac);
+		ArangoDB driver = new ArangoDB.Builder()
+				.loadProperties(MigratorIT.class.getResourceAsStream("/migrantverde.properties")).build();
+		CTX = new DBContext(driver, TEST_DB);
 	}
 
 	/**
@@ -88,20 +74,19 @@ public class MigratorIT {
 	 * @throws ArangoException
 	 */
 	@BeforeClass
-	public static void cleanOutOld() throws ArangoException {
+	public static void cleanOutOld() {
 		try {
-			DRIVER.deleteDatabase(TEST_DB);
-		} catch ( final ArangoException e ) {
-			if ( e.getCode() != 404 ) { // 404 is DB not found.
-				throw e;
-			}
+			CTX.db.drop();
+		} catch ( ArangoDBException e ) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void a() throws ArangoException {
+	public void a() {
 		@SuppressWarnings( "serial" )
-		final Migrator m = new Migrator(DRIVER, Action.MIGRATION, new HashMap<String, String>() {
+		final Migrator m = new Migrator(CTX, Action.MIGRATION, new HashMap<String, String>() {
 			{
 				put("username",
 					"Timmy");
@@ -118,26 +103,25 @@ public class MigratorIT {
 						executed);
 
 		// And now for the actual test!
-		final CollectionEntity user = DRIVER.getCollection("Users"); // <-- See
-																		// full/2.xml
-																		// for
-																		// this
-																		// setting.
+		final ArangoCollection user = CTX.db.collection("Users"); // <-- See
+																	// full/2.xml
+																	// for
+																	// this
+																	// setting.
 		assertNotNull(user);
 
-		final DocumentEntity<BaseDocument> document = DRIVER.getDocument(	"Users",
-																			"dotWarner",
-																			BaseDocument.class);
-		final String docName = (String) document.getEntity().getAttribute("name");
+		BaseDocument document = user.getDocument(	"dotWarner",
+													BaseDocument.class);
+		final String docName = (String) document.getAttribute("name");
 		assertEquals(	"Should be Dot",
 						"Princess Angelina Contessa Louisa Francesca Banana Fanna Bo Besca III",
 						docName);
 
-		final IndexesEntity indexes = DRIVER.getIndexes("Users");
+		final List<IndexEntity> indexes = new LinkedList<>(CTX.db.collection("Users").getIndexes());
 		assertEquals(	2,
-						indexes.getIndexes().size());
+						indexes.size());
 
-		final IndexEntity indexEntity = indexes.getIndexes().get(1);
+		final IndexEntity indexEntity = indexes.get(1);
 		final List<String> expectedFields = new LinkedList<>();
 		expectedFields.add("name");
 		assertEquals(	"Should find expected field of name",
@@ -145,7 +129,7 @@ public class MigratorIT {
 						indexEntity.getFields());
 		assertEquals(	"Should have created a hash index",
 						indexEntity.getType(),
-						IndexType.HASH);
+						IndexType.hash);
 	}
 
 	/**
@@ -155,8 +139,8 @@ public class MigratorIT {
 	 * @throws ArangoException
 	 */
 	@Test
-	public void b() throws ArangoException {
-		final Migrator m = new Migrator(DRIVER, Action.MIGRATION);
+	public void b() {
+		final Migrator m = new Migrator(CTX, Action.MIGRATION);
 		final int executedMigrations = m.migrate("/full");
 
 		assertEquals(	"Should not have executed a thing",
@@ -164,24 +148,23 @@ public class MigratorIT {
 						executedMigrations);
 
 		// And now for the actual test!
-		final CollectionEntity user = DRIVER.getCollection("Users"); // <-- See
-																		// full/2.xml
-																		// for
-																		// this
-																		// setting.
+		final ArangoCollection user = CTX.db.collection("Users"); // <-- See
+																	// full/2.xml
+																	// for
+																	// this
+																	// setting.
 		assertNotNull(user);
 
-		final DocumentEntity<BaseDocument> document = DRIVER.getDocument(	"Users",
-																			"dotWarner",
-																			BaseDocument.class);
-		final String docName = (String) document.getEntity().getAttribute("name");
+		final BaseDocument document = CTX.db.collection("Users").getDocument(	"dotWarner",
+																				BaseDocument.class);
+		final String docName = (String) document.getAttribute("name");
 		assertEquals(	"Should be Dot",
 						"Princess Angelina Contessa Louisa Francesca Banana Fanna Bo Besca III",
 						docName);
 	}
 
 	@Test
-	public void c() throws ArangoException, IOException {
+	public void c() throws IOException {
 		// Copy the migrations from the full and after, to make sure that we
 		// only migrate 2.
 		final File tmpFile = File.createTempFile(	"arangod",
@@ -235,8 +218,7 @@ public class MigratorIT {
 						Paths.get(tempUri),
 						StandardCopyOption.REPLACE_EXISTING);
 		}
-		DRIVER.setDefaultDatabase("IntegrationTestDB");
-		final Migrator m = new Migrator(DRIVER, Action.MIGRATION, "5");
+		final Migrator m = new Migrator(CTX, Action.MIGRATION, "5");
 		final String string = tempDir.toString();
 		final int migrated = m.migrate("file://" + string);
 		assertEquals(	"Should have performed 2 migrations",
@@ -246,7 +228,7 @@ public class MigratorIT {
 
 	@Test
 	public void d() {
-		final Migrator m = new Migrator(DRIVER, Action.MIGRATION);
+		final Migrator m = new Migrator(CTX, Action.MIGRATION);
 		final int executedMigrations = m.migrate(	"/migrations/one",
 													"/migrations/two");
 		assertEquals(	"Should have migrated two files",

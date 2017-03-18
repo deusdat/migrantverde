@@ -19,11 +19,9 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
 import com.deusdatsolutions.migrantverde.Action;
+import com.deusdatsolutions.migrantverde.DBContext;
 import com.deusdatsolutions.migrantverde.MigrationContext;
-import com.deusdatsolutions.migrantverde.MigrationException;
 import com.deusdatsolutions.migrantverde.jaxb.ArangoFunctionType;
 import com.deusdatsolutions.migrantverde.jaxb.CollectionOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType;
@@ -43,7 +41,7 @@ public class MasterHandler {
 
 	private final Map<Class<?>, IMigrationHandler<?>> handlers;
 	private final Action action;
-	private final ArangoDriver driver;
+	private final DBContext dbContext;
 
 	private static Map<Class<?>, IMigrationHandler<?>> createHandlers( Map<String, String> lookup ) {
 		final Map<Class<?>, IMigrationHandler<?>> HANDLERS = new HashMap<>();
@@ -61,29 +59,29 @@ public class MasterHandler {
 	}
 
 	public MasterHandler(	final Action action,
-							final ArangoDriver driver ) {
-		this(createHandlers(new HashMap<String, String>()), action, driver);
+							final DBContext dbContext ) {
+		this(createHandlers(new HashMap<String, String>()), action, dbContext);
 	}
 
 	public MasterHandler(	final Action action,
-							final ArangoDriver driver,
+							final DBContext dbContext,
 							final Map<String, String> lookup ) {
-		this(createHandlers(lookup), action, driver);
+		this(createHandlers(lookup), action, dbContext);
 	}
 
 	/**
 	 * Constructor that allows the handlers to be overridden.
 	 * 
-	 * @param testable
-	 * @param action
-	 * @param driver
+	 * @param testable you're own migration handlers.
+	 * @param action what action you're trying to perform.
+	 * @param dbContext the driver and the specific database being migrated.
 	 */
 	protected MasterHandler(	final Map<Class<?>, IMigrationHandler<?>> testable,
 								final Action action,
-								final ArangoDriver driver ) {
+								final DBContext dbContext ) {
 		this.handlers = testable;
 		this.action = action;
-		this.driver = driver;
+		this.dbContext = dbContext;
 	}
 
 	@SuppressWarnings( "unchecked" )
@@ -99,12 +97,8 @@ public class MasterHandler {
 		}
 
 		handler = this.handlers.get(migrationConfig.getClass());
-		try {
-			handler.migrate(migrationConfig,
-							driver);
-		} catch ( final ArangoException e ) {
-			throw new MigrationException("Could migrate: " + migrationConfig, e);
-		}
+		handler.migrate(migrationConfig,
+						this.dbContext);
 	}
 
 	private Object input( final Down down ) {

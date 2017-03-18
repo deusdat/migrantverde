@@ -21,9 +21,8 @@ import java.util.Map;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.arangodb.ArangoDriver;
-import com.arangodb.ArangoException;
 import com.deusdatsolutions.migrantverde.Action;
+import com.deusdatsolutions.migrantverde.DBContext;
 import com.deusdatsolutions.migrantverde.MigrationContext;
 import com.deusdatsolutions.migrantverde.jaxb.CollectionOperationType;
 import com.deusdatsolutions.migrantverde.jaxb.DatabaseOperationType;
@@ -35,7 +34,7 @@ public class MasterHandlerTest {
 	private final CollectionHandler colHandler = Mockito.mock(CollectionHandler.class);
 	private final DatabaseHandler databaseHandler = Mockito.mock(DatabaseHandler.class);
 	private final AqlHandler aqlHandler = Mockito.mock(AqlHandler.class);
-	private final ArangoDriver mockDriver = Mockito.mock(ArangoDriver.class);
+	private final DBContext mockDriver = Mockito.mock(DBContext.class);
 	private final MasterHandler forMigration;
 	private final MasterHandler forRollback;
 
@@ -54,7 +53,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallMigrateFakeCollection() throws ArangoException {
+	public void shouldCallMigrateFakeCollection() {
 		final MigrationType mt = new MigrationType();
 		final Up up = new Up();
 		up.setCollection(new CollectionOperationType());
@@ -69,7 +68,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallMigrateFakeDatabase() throws ArangoException {
+	public void shouldCallMigrateFakeDatabase() {
 		final MigrationType mt = new MigrationType();
 		final Up up = new Up();
 		up.setDatabase(new DatabaseOperationType());
@@ -84,7 +83,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallMigrateFakeAQL() throws ArangoException {
+	public void shouldCallMigrateFakeAQL() {
 		final MigrationType mt = new MigrationType();
 		final Up up = new Up();
 		up.setAql("FOR u IN users RETURN u");
@@ -99,7 +98,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallRollbackFakeCollection() throws ArangoException {
+	public void shouldCallRollbackFakeCollection() {
 		final MigrationType mt = new MigrationType();
 		final Down down = new Down();
 		down.setCollection(new CollectionOperationType());
@@ -114,7 +113,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallRollbackFakeDatabase() throws ArangoException {
+	public void shouldCallRollbackFakeDatabase() {
 		final MigrationType mt = new MigrationType();
 		final Down down = new Down();
 		down.setDatabase(new DatabaseOperationType());
@@ -129,7 +128,7 @@ public class MasterHandlerTest {
 	}
 
 	@Test
-	public void shouldCallRollbackFakeAQL() throws ArangoException {
+	public void shouldCallRollbackFakeAQL() {
 		final MigrationType mt = new MigrationType();
 		final Down down = new Down();
 		down.setAql("FOR u IN users RETURN u");

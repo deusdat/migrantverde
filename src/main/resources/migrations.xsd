@@ -39,7 +39,7 @@
 					<element name="shardKey" type="string" minOccurs="0"
 						maxOccurs="unbounded"></element>
 				</sequence>
-				<attribute name="journalSize" type="int"></attribute>
+				<attribute name="journalSize" type="long"></attribute>
 				<attribute name="numberOfShards" type="int" />
 				<attribute name="waitForSync" type="boolean" />
 				<attribute name="allowUserKeys" type="boolean" />
@@ -60,6 +60,7 @@
 				<attribute name="sparse" type="boolean" default="false" />
 				<attribute name="minLength" type="integer" default="3" />
 				<attribute name="size" type="integer" />
+				<attribute name="geoJson" type="boolean" default="false" />
 				<attribute name="type" type="tns:IndexKindType" />
 			</extension>
 		</complexContent>
