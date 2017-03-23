@@ -157,4 +157,4 @@ To get them to work you need to specify three **environment** variables: arangoH
 Since this is a full migration, you need provide a root account. 
 
 ## Supported ArangoDB Version
-Presently supports v3 via the HTTP API. The prior release, 0.0.1, supports v2. The next version will support the new binary protocol.
+Presently supports the new binary protocol. Prior supports v3 via the HTTP API. The prior release, 0.0.1, supports v2. The next version will support the new binary protocol.
