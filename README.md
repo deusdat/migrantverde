@@ -10,7 +10,7 @@ The goal behind the project is to apply to ArangoDB years of hard fought lessons
 Similar processes can be established on other database engines using [Liquibase](https://en.wikipedia.org/wiki/Liquibase)
 
 ## Learning by doing (Building a migration set)
-### Instanciating a new environment
+### Instantiating a new environment
 Step Zero: install a copy of ArangoDB into your favorite VM. While this is not actually required, we're proponents of the [12-factor approach to software development](http://12factor.net/). We agree that developers should be as close to production environments as possible. Hence a VM with the same OS as the production environment will have. This eases the process of contineous delivery, since missing or unavailable dependencies on the system will occur during the development. When you deploy ArangoDB, pay attention to the root password you use for ArangoDB. This is different than root for your VM. 
 
 ### Creating a database with access 
