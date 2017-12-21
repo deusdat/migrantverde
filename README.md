@@ -7,6 +7,9 @@ Migrant Verde comes as a light weight library that only depends on [ArangoDB's J
 
 The goal behind the project is to apply to ArangoDB years of hard fought lessons (especially those that kicked us in the teeth). We needed a schema version manager that could create a database, add all of the collections, indexes and data population necessary for a developer to create a local VM of ArangoDB that looks like a mini-production. The system should automatically adjust to merges. At the same time, we need a way to downgrade changes when they prove to be troublesome. While providing all of this, it must also support the neat features we all know and chose ArangoDB for: sharding collections on distributed systems. This means that we can't rely on creating the collection automatically if it doesn't exist when inserting a document. Sometimes collections should come preloaded with some documents from start.
 
+# Deprecated
+This project is deprecated. Due to Java 9 issues and the imposition of the JVM into systems that wouldn't use it otherwise, this project is replaced with [ArangoMiGo](https://github.com/deusdat/arangomigo). Now you can get better migration configurations, great migrations and a standalone binary. All tolled an easier to use experience.
+
 Similar processes can be established on other database engines using [Liquibase](https://en.wikipedia.org/wiki/Liquibase)
 
 ## Learning by doing (Building a migration set)
